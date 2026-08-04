@@ -47,9 +47,8 @@
             {% endif %}
             <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light"><i class="fas fa-right-from-bracket"></i></a>
           {% else %}
-            <a href="{{ url_for('auth.login', role='customer') }}" class="btn btn-outline-light me-1">Customer Login</a>
-            <a href="{{ url_for('auth.login', role='provider') }}" class="btn btn-outline-warning me-1">Provider Login</a>
-            <a href="{{ url_for('auth.login', role='admin') }}" class="btn btn-outline-info">Admin</a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light me-2">Sign In</a>
+            <a href="{{ url_for('auth.register_customer') }}" class="btn btn-primary-gradient">Sign Up</a>
           {% endif %}
         </div>
       </div>
@@ -103,9 +102,9 @@
         <div class="col-md-3">
           <h6 class="text-white fw-bold">Panels</h6>
           <ul class="list-unstyled small">
-            <li><a href="{{ url_for('auth.login', role='customer') }}" class="text-secondary text-decoration-none">Customer Portal</a></li>
-            <li><a href="{{ url_for('auth.login', role='provider') }}" class="text-secondary text-decoration-none">Service Provider Portal</a></li>
-            <li><a href="{{ url_for('auth.login', role='admin') }}" class="text-secondary text-decoration-none">Admin Control Center</a></li>
+            <li><a href="{{ url_for('auth.login') }}" class="text-secondary text-decoration-none">Account Login</a></li>
+            <li><a href="{{ url_for('auth.register_customer') }}" class="text-secondary text-decoration-none">Customer Sign Up</a></li>
+            <li><a href="{{ url_for('auth.register_provider') }}" class="text-secondary text-decoration-none">Provider Registration</a></li>
           </ul>
         </div>
         <div class="col-md-3">

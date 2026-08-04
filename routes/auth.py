@@ -21,8 +21,6 @@ def login():
         else:
             return redirect(url_for('customer.dashboard'))
 
-    role_tab = request.args.get('role', 'customer')
-
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '')
@@ -32,23 +30,23 @@ def login():
 
         if not user or not user.check_password(password):
             flash('Invalid email or password. Please check your credentials.', 'danger')
-            return render_template('auth/login.html', role_tab=role_tab)
+            return render_template('auth/login.html')
 
         if not user.is_active:
             flash('Your account has been deactivated. Please contact support.', 'warning')
-            return render_template('auth/login.html', role_tab=role_tab)
+            return render_template('auth/login.html')
 
         if user.is_provider():
             profile = user.provider_profile
             if profile and profile.status == 'pending':
                 flash('Your provider application is currently pending admin approval.', 'warning')
-                return render_template('auth/login.html', role_tab='provider')
+                return render_template('auth/login.html')
             elif profile and profile.status == 'rejected':
                 flash('Your provider application was rejected by admin.', 'danger')
-                return render_template('auth/login.html', role_tab='provider')
+                return render_template('auth/login.html')
             elif profile and profile.status == 'suspended':
                 flash('Your provider account has been suspended.', 'danger')
-                return render_template('auth/login.html', role_tab='provider')
+                return render_template('auth/login.html')
 
         login_user(user, remember=remember)
         flash(f'Welcome back, {user.name}!', 'success')
@@ -64,13 +62,32 @@ def login():
         else:
             return redirect(url_for('customer.dashboard'))
 
-    return render_template('auth/login.html', role_tab=role_tab)
+    return render_template('auth/login.html')
 
 
+def detect_role_from_email(email):
+    email_lower = email.lower()
+    if 'admin' in email_lower:
+        return 'admin', None
+    elif 'fuel' in email_lower:
+        return 'provider', 'fuel'
+    elif 'mechanic' in email_lower:
+        return 'provider', 'mechanic'
+    elif 'tow' in email_lower or 'towing' in email_lower:
+        return 'provider', 'tow'
+    else:
+        return 'customer', None
+
+@auth_bp.route('/register', methods=['GET', 'POST'])
 @auth_bp.route('/register/customer', methods=['GET', 'POST'])
 def register_customer():
     if current_user.is_authenticated:
-        return redirect(url_for('customer.dashboard'))
+        if current_user.is_admin():
+            return redirect(url_for('admin.dashboard'))
+        elif current_user.is_provider():
+            return redirect(url_for('provider.dashboard'))
+        else:
+            return redirect(url_for('customer.dashboard'))
 
     if request.method == 'POST':
         name = request.form.get('name', '').strip()
@@ -79,7 +96,7 @@ def register_customer():
         password = request.form.get('password', '')
         confirm_password = request.form.get('confirm_password', '')
 
-        if password != confirm_password:
+        if password and confirm_password and password != confirm_password:
             flash('Passwords do not match.', 'danger')
             return render_template('auth/register_customer.html')
 
@@ -88,20 +105,41 @@ def register_customer():
             flash('An account with this email already exists.', 'warning')
             return render_template('auth/register_customer.html')
 
+        # Auto-detect role and provider type based on email keyword
+        role, provider_type = detect_role_from_email(email)
+
         user = User(
             name=name,
             email=email,
             phone=phone,
-            role='customer'
+            role=role
         )
         user.set_password(password)
-
         db.session.add(user)
+        db.session.flush()
+
+        if role == 'provider':
+            provider_profile = ProviderProfile(
+                user_id=user.id,
+                provider_type=provider_type or 'mechanic',
+                business_name=f"{name}'s {provider_type.capitalize() if provider_type else 'Service'} Station",
+                license_number=f"LIC-{user.id:04d}",
+                status='approved',
+                is_online=True
+            )
+            db.session.add(provider_profile)
+
         db.session.commit()
 
         login_user(user)
-        flash('Account created successfully! Welcome to MotoServe 360.', 'success')
-        return redirect(url_for('customer.dashboard'))
+        flash(f'Account created successfully! Redirecting to your {role.capitalize()} Panel.', 'success')
+
+        if user.is_admin():
+            return redirect(url_for('admin.dashboard'))
+        elif user.is_provider():
+            return redirect(url_for('provider.dashboard'))
+        else:
+            return redirect(url_for('customer.dashboard'))
 
     return render_template('auth/register_customer.html')
 
@@ -150,15 +188,56 @@ def register_provider():
             business_name=business_name,
             license_number=license_number,
             document_url=document_filename,
-            status='pending' # Requires admin approval
+            status='approved',
+            is_online=True
         )
         db.session.add(provider_profile)
         db.session.commit()
 
-        flash('Registration submitted! Your provider application is pending admin approval.', 'info')
-        return redirect(url_for('auth.login', role='provider'))
+        login_user(user)
+        flash('Provider account registered successfully! Welcome to MotoServe 360.', 'success')
+        return redirect(url_for('provider.dashboard'))
 
     return render_template('auth/register_provider.html')
+
+
+@auth_bp.route('/register/admin', methods=['GET', 'POST'])
+def register_admin():
+    if current_user.is_authenticated:
+        return redirect(url_for('admin.dashboard'))
+
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        email = request.form.get('email', '').strip().lower()
+        phone = request.form.get('phone', '').strip()
+        password = request.form.get('password', '')
+        confirm_password = request.form.get('confirm_password', '')
+
+        if password != confirm_password:
+            flash('Passwords do not match.', 'danger')
+            return render_template('auth/register_admin.html')
+
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            flash('An account with this email already exists.', 'warning')
+            return render_template('auth/register_admin.html')
+
+        user = User(
+            name=name,
+            email=email,
+            phone=phone,
+            role='admin'
+        )
+        user.set_password(password)
+
+        db.session.add(user)
+        db.session.commit()
+
+        login_user(user)
+        flash('Admin Account created successfully! Welcome to Admin Control Center.', 'success')
+        return redirect(url_for('admin.dashboard'))
+
+    return render_template('auth/register_admin.html')
 
 
 @auth_bp.route('/logout')
