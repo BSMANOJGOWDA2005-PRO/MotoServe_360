@@ -1,0 +1,91 @@
+{% extends 'customer/base_customer.html' %}
+
+{% block title %}My Vehicles - Customer Portal{% endblock %}
+
+{% block customer_content %}
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="glass-card p-4">
+      <h4 class="fw-bold text-white mb-4"><i class="fas fa-plus-circle text-primary me-2"></i>Add New Vehicle</h4>
+      <form action="{{ url_for('customer.vehicles') }}" method="POST">
+        <div class="mb-3">
+          <label class="form-label text-white small">Vehicle Make (Manufacturer)</label>
+          <input type="text" name="make" class="form-control" placeholder="e.g. Honda, Toyota, Royal Enfield" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-white small">Model</label>
+          <input type="text" name="model" class="form-control" placeholder="e.g. City, Civic, Classic 350" required>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-6">
+            <label class="form-label text-white small">Manufacture Year</label>
+            <input type="number" name="year" class="form-control" value="2023" min="1990" max="2026" required>
+          </div>
+          <div class="col-6">
+            <label class="form-label text-white small">Vehicle Type</label>
+            <select name="vehicle_type" class="form-select">
+              <option value="car">Car</option>
+              <option value="bike">Bike / Motorcycle</option>
+              <option value="truck">Truck / SUV</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-6">
+            <label class="form-label text-white small">License Plate Number</label>
+            <input type="text" name="license_plate" class="form-control" placeholder="KA-01-AB-1234" required>
+          </div>
+          <div class="col-6">
+            <label class="form-label text-white small">Fuel Type</label>
+            <select name="fuel_type" class="form-select">
+              <option value="petrol">Petrol</option>
+              <option value="diesel">Diesel</option>
+              <option value="cng">CNG</option>
+              <option value="electric">Electric (EV)</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary-gradient w-100">Save Vehicle</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="glass-card p-4">
+      <h4 class="fw-bold text-white mb-4"><i class="fas fa-car text-primary me-2"></i>My Registered Vehicles</h4>
+
+      {% if vehicles %}
+        <div class="row g-3">
+          {% for v in vehicles %}
+            <div class="col-md-6">
+              <div class="p-4 rounded-3 bg-dark border border-secondary border-opacity-25 h-100 d-flex flex-column justify-content-between">
+                <div>
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="fw-bold text-white mb-0">{{ v.make }} {{ v.model }}</h5>
+                    <span class="badge bg-primary bg-opacity-20 text-primary">{{ v.vehicle_type|upper }}</span>
+                  </div>
+                  <div class="text-muted small mb-1"><i class="fas fa-id-card me-1"></i> {{ v.license_plate }}</div>
+                  <div class="text-muted small mb-3"><i class="fas fa-gas-pump me-1"></i> Fuel: <span class="text-warning text-uppercase fw-semibold">{{ v.fuel_type }}</span> • Year: {{ v.year }}</div>
+                </div>
+
+                <form action="{{ url_for('customer.delete_vehicle', vehicle_id=v.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to remove this vehicle?');">
+                  <button type="submit" class="btn btn-sm btn-outline-danger w-100"><i class="fas fa-trash me-1"></i> Remove Vehicle</button>
+                </form>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center py-5 text-muted">
+          <i class="fas fa-car-rear fs-1 mb-3 opacity-50"></i>
+          <p>No vehicles added yet. Add your vehicle details on the left form!</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

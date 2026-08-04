@@ -1,0 +1,76 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block title %}Manage Providers - Admin Center{% endblock %}
+
+{% block admin_content %}
+<div class="glass-card p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold text-white mb-0"><i class="fas fa-truck-pickup text-warning me-2"></i>Service Providers Management</h4>
+    <div class="btn-group btn-group-sm">
+      <a href="{{ url_for('admin.providers', status='all') }}" class="btn btn-outline-light {% if status_filter == 'all' %}active{% endif %}">All</a>
+      <a href="{{ url_for('admin.providers', status='pending') }}" class="btn btn-outline-warning {% if status_filter == 'pending' %}active{% endif %}">Pending</a>
+      <a href="{{ url_for('admin.providers', status='approved') }}" class="btn btn-outline-success {% if status_filter == 'approved' %}active{% endif %}">Approved</a>
+      <a href="{{ url_for('admin.providers', status='suspended') }}" class="btn btn-outline-danger {% if status_filter == 'suspended' %}active{% endif %}">Suspended</a>
+    </div>
+  </div>
+
+  {% if providers %}
+    <div class="table-responsive">
+      <table class="table table-dark table-hover align-middle">
+        <thead>
+          <tr class="text-muted small">
+            <th>Business / Garage</th>
+            <th>Owner Info</th>
+            <th>Type</th>
+            <th>License #</th>
+            <th>Status</th>
+            <th>Rating</th>
+            <th>Document</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in providers %}
+            <tr>
+              <td class="fw-bold text-white">{{ p.business_name }}</td>
+              <td class="small">{{ p.user.name }}<br><span class="text-muted">{{ p.user.email }}</span></td>
+              <td><span class="badge bg-secondary text-uppercase">{{ p.provider_type }}</span></td>
+              <td class="small">{{ p.license_number }}</td>
+              <td><span class="badge badge-status badge-{{ p.status }}">{{ p.status }}</span></td>
+              <td><span class="text-warning"><i class="fas fa-star"></i> {{ p.rating }}</span></td>
+              <td>
+                {% if p.document_url %}
+                  <a href="{{ url_for('static', filename='uploads/' + p.document_url) }}" target="_blank" class="btn btn-sm btn-outline-info"><i class="fas fa-file-pdf"></i> View</a>
+                {% else %}
+                  <span class="text-muted small">None</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="btn-group btn-group-sm">
+                  {% if p.status != 'approved' %}
+                    <form action="{{ url_for('admin.provider_action', provider_id=p.id, action='approve') }}" method="POST">
+                      <button type="submit" class="btn btn-success" title="Approve"><i class="fas fa-check"></i></button>
+                    </form>
+                  {% endif %}
+                  {% if p.status != 'rejected' %}
+                    <form action="{{ url_for('admin.provider_action', provider_id=p.id, action='reject') }}" method="POST">
+                      <button type="submit" class="btn btn-warning" title="Reject"><i class="fas fa-xmark"></i></button>
+                    </form>
+                  {% endif %}
+                  {% if p.status != 'suspended' %}
+                    <form action="{{ url_for('admin.provider_action', provider_id=p.id, action='suspend') }}" method="POST">
+                      <button type="submit" class="btn btn-danger" title="Suspend"><i class="fas fa-ban"></i></button>
+                    </form>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="text-muted text-center py-4">No providers found for the selected status filter.</p>
+  {% endif %}
+</div>
+{% endblock %}

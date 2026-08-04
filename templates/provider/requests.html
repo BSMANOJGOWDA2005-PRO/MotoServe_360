@@ -1,0 +1,52 @@
+{% extends 'provider/base_provider.html' %}
+
+{% block title %}Nearby Requests - Provider Portal{% endblock %}
+
+{% block provider_content %}
+<div class="glass-card p-4">
+  <h4 class="fw-bold text-white mb-4"><i class="fas fa-satellite-dish text-warning me-2"></i>Incoming Nearby Service Requests</h4>
+
+  {% if requests %}
+    <div class="row g-4">
+      {% for r in requests %}
+        <div class="col-md-6">
+          <div class="p-4 rounded-3 bg-dark border border-secondary border-opacity-25 h-100 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                  <h5 class="fw-bold text-white mb-0">Request #{{ r.request_number }}</h5>
+                  <span class="small text-muted">Customer: {{ r.customer.name }} ({{ r.customer.phone }})</span>
+                </div>
+                <span class="fs-4 fw-bold text-success">₹{{ r.final_amount }}</span>
+              </div>
+
+              <div class="p-3 rounded-3 bg-secondary bg-opacity-10 mb-3">
+                <div class="small text-muted mb-1"><i class="fas fa-location-dot text-primary me-2"></i>Pickup Address:</div>
+                <div class="fw-medium text-white small">{{ r.pickup_address }}</div>
+                {% if r.drop_address %}
+                  <div class="small text-muted mt-2 mb-1"><i class="fas fa-flag-checkered text-danger me-2"></i>Drop Destination:</div>
+                  <div class="fw-medium text-white small">{{ r.drop_address }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="d-flex gap-2">
+              <form action="{{ url_for('provider.accept_request', request_id=r.id) }}" method="POST" class="flex-grow-1">
+                <button type="submit" class="btn btn-success w-100 fw-bold"><i class="fas fa-check me-1"></i> Accept Request</button>
+              </form>
+              <form action="{{ url_for('provider.reject_request', request_id=r.id) }}" method="POST">
+                <button type="submit" class="btn btn-outline-danger"><i class="fas fa-xmark"></i></button>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="fas fa-check-double fs-1 mb-3 text-success opacity-50"></i>
+      <p>No pending requests available in your area right now.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

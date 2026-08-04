@@ -1,0 +1,164 @@
+{% extends 'customer/base_customer.html' %}
+
+{% block title %}Live Tracking - Service #{{ req.request_number }}{% endblock %}
+
+{% block customer_content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <!-- Map Tracking Container -->
+    <div class="glass-card p-4 mb-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h4 class="fw-bold text-white mb-0">Live Service Tracking</h4>
+          <span class="small text-muted">Request #{{ req.request_number }} • {{ req.service_type|upper }}</span>
+        </div>
+        <div>
+          <span id="tracking-status-badge" class="badge badge-status badge-{{ req.status }} fs-6">{{ req.status }}</span>
+        </div>
+      </div>
+
+      <div id="tracking-map" style="height: 420px; border-radius: 12px;"></div>
+    </div>
+
+    <!-- Status Progression Workflow Bar -->
+    <div class="glass-card p-4">
+      <h6 class="fw-bold text-white mb-3">Service Progression Pipeline</h6>
+      <div class="d-flex justify-content-between text-center position-relative">
+        <div class="z-1">
+          <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center {% if req.status in ['accepted', 'travelling', 'reached', 'working', 'completed'] %}bg-primary text-white{% else %}bg-secondary text-muted{% endif %}" style="width: 40px; height: 40px;">
+            <i class="fas fa-check"></i>
+          </div>
+          <span class="small text-white">Accepted</span>
+        </div>
+
+        <div class="z-1">
+          <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center {% if req.status in ['travelling', 'reached', 'working', 'completed'] %}bg-primary text-white{% else %}bg-secondary text-muted{% endif %}" style="width: 40px; height: 40px;">
+            <i class="fas fa-truck-fast"></i>
+          </div>
+          <span class="small text-white">Travelling</span>
+        </div>
+
+        <div class="z-1">
+          <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center {% if req.status in ['reached', 'working', 'completed'] %}bg-primary text-white{% else %}bg-secondary text-muted{% endif %}" style="width: 40px; height: 40px;">
+            <i class="fas fa-location-dot"></i>
+          </div>
+          <span class="small text-white">Arrived</span>
+        </div>
+
+        <div class="z-1">
+          <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center {% if req.status in ['working', 'completed'] %}bg-primary text-white{% else %}bg-secondary text-muted{% endif %}" style="width: 40px; height: 40px;">
+            <i class="fas fa-gears"></i>
+          </div>
+          <span class="small text-white">In Progress</span>
+        </div>
+
+        <div class="z-1">
+          <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center {% if req.status == 'completed' %}bg-success text-white{% else %}bg-secondary text-muted{% endif %}" style="width: 40px; height: 40px;">
+            <i class="fas fa-flag-checkered"></i>
+          </div>
+          <span class="small text-white">Completed</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <!-- Provider Info Card -->
+    <div class="glass-card p-4 mb-4">
+      <h5 class="fw-bold text-white mb-3"><i class="fas fa-id-badge text-primary me-2"></i>Assigned Provider</h5>
+      {% if req.provider_profile %}
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="rounded-circle bg-primary bg-opacity-20 p-3 text-primary fs-3">
+            <i class="fas fa-user-shield"></i>
+          </div>
+          <div>
+            <h6 class="fw-bold text-white mb-0">{{ req.provider_profile.business_name }}</h6>
+            <div class="small text-warning">
+              <i class="fas fa-star"></i> {{ req.provider_profile.rating }} / 5.0 (Verified)
+            </div>
+            <div class="small text-muted">{{ req.provider_profile.user.phone }}</div>
+          </div>
+        </div>
+
+        <div class="d-grid gap-2">
+          <a href="tel:{{ req.provider_profile.user.phone }}" class="btn btn-outline-success"><i class="fas fa-phone me-2"></i>Call Provider</a>
+          <a href="{{ url_for('customer.chat', request_id=req.id) }}" class="btn btn-outline-primary"><i class="fas fa-comments me-2"></i>In-App Chat</a>
+        </div>
+      {% else %}
+        <div class="text-center py-3 text-muted">
+          <i class="fas fa-spinner fa-spin fs-3 mb-2"></i>
+          <p class="small mb-0">Searching nearest available provider...</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Payment & Invoice Actions -->
+    <div class="glass-card p-4">
+      <h5 class="fw-bold text-white mb-3"><i class="fas fa-receipt text-warning me-2"></i>Bill & Payment</h5>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="text-muted">Total Amount:</span>
+        <span class="fs-4 fw-bold text-success">₹{{ req.final_amount }}</span>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <span class="text-muted">Payment Status:</span>
+        <span class="badge {% if req.payment_status == 'paid' %}bg-success{% else %}bg-warning text-dark{% endif %} text-uppercase px-3 py-2">
+          {{ req.payment_status }}
+        </span>
+      </div>
+
+      {% if req.payment_status != 'paid' %}
+        <form action="{{ url_for('customer.process_service_payment', request_id=req.id) }}" method="POST" class="mb-3">
+          <div class="mb-3">
+            <label class="form-label text-white small">Payment Method</label>
+            <select name="payment_method" class="form-select">
+              <option value="upi">UPI (GPay / PhonePe / Paytm)</option>
+              <option value="card">Credit / Debit Card</option>
+              <option value="wallet">Digital Wallet</option>
+              <option value="cash">Cash on Service</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-success w-100 fw-bold py-2"><i class="fas fa-credit-card me-2"></i>Pay ₹{{ req.final_amount }} Now</button>
+        </form>
+      {% endif %}
+
+      <a href="{{ url_for('customer.download_invoice', type_name='service', item_id=req.id) }}" target="_blank" class="btn btn-outline-light w-100">
+        <i class="fas fa-file-invoice me-2"></i>Download Printable Invoice
+      </a>
+    </div>
+
+    <!-- Review Rating Widget for Completed Request -->
+    {% if req.status == 'completed' %}
+      <div class="glass-card p-4 mt-4">
+        <h5 class="fw-bold text-white mb-3"><i class="fas fa-star text-warning me-2"></i>Rate Provider</h5>
+        <form action="{{ url_for('customer.submit_review', request_id=req.id) }}" method="POST">
+          <div class="mb-3">
+            <label class="form-label text-white small">Rating (1 to 5 Stars)</label>
+            <select name="rating" class="form-select">
+              <option value="5">⭐⭐⭐⭐⭐ 5 - Excellent</option>
+              <option value="4">⭐⭐⭐⭐ 4 - Very Good</option>
+              <option value="3">⭐⭐⭐ 3 - Average</option>
+              <option value="2">⭐⭐ 2 - Poor</option>
+              <option value="1">⭐ 1 - Terrible</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-white small">Comments</label>
+            <textarea name="comment" class="form-control" rows="2" placeholder="Write feedback..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-warning w-100 text-dark fw-bold">Submit Review</button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/tracking.js') }}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  startLiveTracking({{ req.id }}, 'tracking-map');
+});
+</script>
+{% endblock %}

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Admin Control Center - MotoServe 360{% endblock %}</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
+    <div class="container-fluid px-4">
+      <a class="navbar-brand me-4" href="{{ url_for('admin.dashboard') }}">
+        <i class="fas fa-cubes-stacked me-2 text-danger"></i>MotoServe<span>360</span> Admin
+      </a>
+
+      <div class="d-flex align-items-center gap-3 ms-auto">
+        <a href="{{ url_for('admin.reports') }}" class="btn btn-outline-info btn-sm"><i class="fas fa-file-shield me-1"></i> System Audit Logs</a>
+        
+        <!-- Admin Profile -->
+        <div class="dropdown">
+          <button class="btn btn-outline-secondary dropdown-toggle text-white border-0 bg-dark" type="button" data-bs-toggle="dropdown">
+            <i class="fas fa-user-shield me-1 text-danger"></i> Admin Mode
+          </button>
+          <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+            <li><a class="dropdown-item" href="{{ url_for('admin.settings') }}"><i class="fas fa-gear me-2"></i>Settings</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('admin.backup_db') }}"><i class="fas fa-database me-2"></i>Backup DB</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="fas fa-right-from-bracket me-2"></i>Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Dashboard Container -->
+  <div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <i class="fas fa-shield-halved text-danger"></i> Admin Center
+      </div>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
+            <i class="fas fa-chart-pie"></i> Analytics & Overview
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('admin.providers') }}" class="sidebar-link {% if request.endpoint == 'admin.providers' %}active{% endif %}">
+            <i class="fas fa-id-card"></i> Manage Providers
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('admin.users') }}" class="sidebar-link {% if request.endpoint == 'admin.users' %}active{% endif %}">
+            <i class="fas fa-users"></i> Manage Users
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('admin.requests') }}" class="sidebar-link {% if request.endpoint == 'admin.requests' %}active{% endif %}">
+            <i class="fas fa-truck-monster"></i> Service Requests
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('admin.products') }}" class="sidebar-link {% if request.endpoint == 'admin.products' %}active{% endif %}">
+            <i class="fas fa-box-open"></i> Products Catalog
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('admin.orders') }}" class="sidebar-link {% if request.endpoint == 'admin.orders' %}active{% endif %}">
+            <i class="fas fa-bag-shopping"></i> Product Orders
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('admin.reports') }}" class="sidebar-link {% if request.endpoint == 'admin.reports' %}active{% endif %}">
+            <i class="fas fa-chart-line"></i> Revenue & Reports
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('admin.settings') }}" class="sidebar-link {% if request.endpoint == 'admin.settings' %}active{% endif %}">
+            <i class="fas fa-sliders"></i> Settings & Backup
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-content">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+              <i class="fas fa-circle-check me-2"></i>{{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      {% block admin_content %}{% endblock %}
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

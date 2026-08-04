@@ -1,0 +1,39 @@
+{% extends 'customer/base_customer.html' %}
+
+{% block title %}My Profile - Customer Portal{% endblock %}
+
+{% block customer_content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="glass-card p-4 p-md-5">
+      <div class="text-center mb-4">
+        <div class="rounded-circle bg-primary bg-opacity-20 text-primary p-3 d-inline-block fs-1 mb-2">
+          <i class="fas fa-user-circle"></i>
+        </div>
+        <h4 class="fw-bold text-white mb-0">{{ current_user.name }}</h4>
+        <span class="badge bg-secondary">Customer Account</span>
+      </div>
+
+      <form action="{{ url_for('customer.profile') }}" method="POST">
+        <div class="mb-3">
+          <label class="form-label text-white small">Full Name</label>
+          <input type="text" name="name" value="{{ current_user.name }}" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-white small">Email Address</label>
+          <input type="email" value="{{ current_user.email }}" class="form-control" disabled>
+          <div class="form-text text-muted small">Email address cannot be changed.</div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label text-white small">Phone Number</label>
+          <input type="tel" name="phone" value="{{ current_user.phone }}" class="form-control" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary-gradient w-100 py-2.5">Update Profile</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'customer/base_customer.html' %}
+
+{% block title %}Live Chat - Service #{{ req.request_number }}{% endblock %}
+
+{% block customer_content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="glass-card p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom border-secondary border-opacity-25">
+        <div class="d-flex align-items-center gap-3">
+          <a href="{{ url_for('customer.tracking', request_id=req.id) }}" class="btn btn-sm btn-outline-light"><i class="fas fa-arrow-left"></i></a>
+          <div>
+            <h5 class="fw-bold text-white mb-0">Chat with Service Provider</h5>
+            <div class="small text-muted">Request #{{ req.request_number }} • {% if req.provider_profile %}{{ req.provider_profile.business_name }}{% else %}Searching Provider{% endif %}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Messages Box -->
+      <div id="chat-messages-box" class="p-3 rounded-3 bg-dark border border-secondary border-opacity-25 mb-3" style="height: 380px; overflow-y: auto;">
+        <!-- Dynamic AJAX content via chat.js -->
+      </div>
+
+      <!-- Send Form -->
+      <form id="chat-form" class="d-flex gap-2">
+        <input type="text" id="chat-input" class="form-control" placeholder="Type a message..." required autocomplete="off">
+        <button type="submit" class="btn btn-primary-gradient px-4"><i class="fas fa-paper-plane"></i></button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  initChatWindow({{ req.id }}, {{ current_user.id }});
+});
+</script>
+{% endblock %}

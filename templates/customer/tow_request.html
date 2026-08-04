@@ -1,0 +1,97 @@
+{% extends 'customer/base_customer.html' %}
+
+{% block title %}Request Towing Service - Customer Portal{% endblock %}
+
+{% block customer_content %}
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="glass-card p-4">
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="icon-wrapper icon-tow m-0" style="width: 45px; height: 45px; font-size: 1.2rem;"><i class="fas fa-truck-pickup"></i></div>
+        <div>
+          <h4 class="fw-bold text-white mb-0">Emergency Towing Service</h4>
+          <p class="text-muted small mb-0">Flatbed & wheel-lift towing for vehicles</p>
+        </div>
+      </div>
+
+      <form action="{{ url_for('customer.request_tow') }}" method="POST">
+        <div class="mb-3">
+          <label class="form-label text-white small">Select Vehicle</label>
+          <select name="vehicle_id" class="form-select">
+            <option value="">-- General Request --</option>
+            {% for v in vehicles %}
+              <option value="{{ v.id }}">{{ v.make }} {{ v.model }} ({{ v.license_plate }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-white small">Reason for Towing</label>
+          <select name="towing_reason" class="form-select" required>
+            <option value="Accident Recovery">Accident Recovery / Crash</option>
+            <option value="Engine Failure">Complete Engine Failure</option>
+            <option value="Transmission Problem">Gearbox / Transmission Stuck</option>
+            <option value="Multiple Flat Tires">Multiple Flat Tires</option>
+            <option value="Vehicle Transfer">Vehicle Transfer to Garage</option>
+          </select>
+        </div>
+
+        <!-- Pickup Address -->
+        <div class="mb-3">
+          <label class="form-label text-white small">Pickup Location (Breakdown Spot)</label>
+          <input type="text" name="pickup_address" id="pickup_address" class="form-control" value="Koramangala 8th Block, Bengaluru" required>
+        </div>
+
+        <!-- Drop Address -->
+        <div class="mb-3">
+          <label class="form-label text-white small">Drop Destination (Garage / Home)</label>
+          <input type="text" name="drop_address" id="drop_address" class="form-control" value="Apex Garage, Whitefield, Bengaluru" required>
+        </div>
+
+        <input type="hidden" name="pickup_lat" id="pickup_lat" value="12.9352">
+        <input type="hidden" name="pickup_lng" id="pickup_lng" value="77.6245">
+        <input type="hidden" name="drop_lat" id="drop_lat" value="12.9698">
+        <input type="hidden" name="drop_lng" id="drop_lng" value="77.7500">
+
+        <!-- Fee Card -->
+        <div class="p-3 rounded-3 bg-dark border border-secondary border-opacity-25 mb-4">
+          <div class="d-flex justify-content-between small text-muted mb-1">
+            <span>Base Tow Charge:</span>
+            <span>₹300.00</span>
+          </div>
+          <div class="d-flex justify-content-between small text-muted mb-2">
+            <span>Distance Charge (Est. 5.5 KM @ ₹35/KM):</span>
+            <span>₹192.50</span>
+          </div>
+          <hr class="border-secondary my-2">
+          <div class="d-flex justify-content-between fw-bold text-white fs-5">
+            <span>Estimated Total:</span>
+            <span class="text-danger">₹492.50</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-danger w-100 py-2.5 fw-bold"><i class="fas fa-paper-plane me-2"></i>Dispatch Tow Truck</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="glass-card p-4">
+      <h5 class="fw-bold text-white mb-2"><i class="fas fa-route text-danger me-2"></i>Pickup & Destination Route Map</h5>
+      <p class="text-muted small mb-3">Set pickup location on the map.</p>
+      <div id="tow-map" style="height: 440px; border-radius: 12px;"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const map = initMap('tow-map', 12.9352, 77.6245, 13);
+  if (map) {
+    setPickupLocationPicker(map, 'pickup_lat', 'pickup_lng', 'pickup_address');
+  }
+});
+</script>
+{% endblock %}

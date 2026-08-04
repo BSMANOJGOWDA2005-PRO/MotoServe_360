@@ -1,0 +1,49 @@
+{% extends 'provider/base_provider.html' %}
+
+{% block title %}Business Profile - Provider Portal{% endblock %}
+
+{% block provider_content %}
+<div class="row justify-content-center">
+  <div class="col-md-7">
+    <div class="glass-card p-4 p-md-5">
+      <div class="text-center mb-4">
+        <div class="rounded-circle bg-warning bg-opacity-20 text-warning p-3 d-inline-block fs-1 mb-2">
+          <i class="fas fa-building"></i>
+        </div>
+        <h4 class="fw-bold text-white mb-1">{{ profile.business_name }}</h4>
+        <span class="badge bg-success text-uppercase">{{ profile.status }} Provider</span>
+      </div>
+
+      <form action="{{ url_for('provider.profile') }}" method="POST">
+        <div class="mb-3">
+          <label class="form-label text-white small">Business / Garage Name</label>
+          <input type="text" name="business_name" value="{{ profile.business_name }}" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-white small">Owner Name</label>
+          <input type="text" name="name" value="{{ current_user.name }}" class="form-control" required>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-6">
+            <label class="form-label text-white small">Provider Type</label>
+            <input type="text" value="{{ profile.provider_type|upper }}" class="form-control" disabled>
+          </div>
+          <div class="col-6">
+            <label class="form-label text-white small">License / Reg Number</label>
+            <input type="text" name="license_number" value="{{ profile.license_number }}" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label text-white small">Phone Number</label>
+          <input type="tel" name="phone" value="{{ current_user.phone }}" class="form-control" required>
+        </div>
+
+        <button type="submit" class="btn btn-warning w-100 fw-bold py-2.5">Update Provider Details</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Customer Portal - MotoServe 360{% endblock %}</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
+    <div class="container-fluid px-4">
+      <a class="navbar-brand me-4" href="{{ url_for('customer.dashboard') }}">
+        <i class="fas fa-cubes-stacked me-2 text-primary"></i>MotoServe<span>360</span>
+      </a>
+
+      <div class="d-flex align-items-center gap-3 ms-auto">
+        <!-- Cart Badge -->
+        <a href="{{ url_for('customer.view_cart') }}" class="btn btn-outline-light position-relative btn-sm px-3">
+          <i class="fas fa-cart-shopping"></i>
+          {% if cart_items_count > 0 %}
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">
+              {{ cart_items_count }}
+            </span>
+          {% endif %}
+        </a>
+
+        <!-- Notifications Badge -->
+        <a href="{{ url_for('customer.notifications') }}" class="btn btn-outline-light position-relative btn-sm px-3">
+          <i class="fas fa-bell"></i>
+          {% if unread_notifications_count > 0 %}
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+              {{ unread_notifications_count }}
+            </span>
+          {% endif %}
+        </a>
+
+        <!-- User Profile Dropdown -->
+        <div class="dropdown">
+          <button class="btn btn-outline-secondary dropdown-toggle text-white border-0 bg-dark" type="button" data-bs-toggle="dropdown">
+            <i class="fas fa-user-circle me-1 text-primary"></i> {{ current_user.name }}
+          </button>
+          <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+            <li><a class="dropdown-item" href="{{ url_for('customer.profile') }}"><i class="fas fa-id-card me-2"></i>My Profile</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('customer.vehicles') }}"><i class="fas fa-car me-2"></i>My Vehicles</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="fas fa-right-from-bracket me-2"></i>Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Dashboard Container -->
+  <div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <i class="fas fa-user-gear text-primary"></i> Customer Panel
+      </div>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="{{ url_for('customer.dashboard') }}" class="sidebar-link {% if request.endpoint == 'customer.dashboard' %}active{% endif %}">
+            <i class="fas fa-gauge-high"></i> Dashboard
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('customer.vehicles') }}" class="sidebar-link {% if request.endpoint == 'customer.vehicles' %}active{% endif %}">
+            <i class="fas fa-car-side"></i> My Vehicles
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('customer.request_fuel') }}" class="sidebar-link {% if request.endpoint == 'customer.request_fuel' %}active{% endif %}">
+            <i class="fas fa-gas-pump text-warning"></i> Request Fuel
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('customer.request_repair') }}" class="sidebar-link {% if request.endpoint == 'customer.request_repair' %}active{% endif %}">
+            <i class="fas fa-wrench text-primary"></i> Book Repair
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('customer.request_tow') }}" class="sidebar-link {% if request.endpoint == 'customer.request_tow' %}active{% endif %}">
+            <i class="fas fa-truck-pickup text-danger"></i> Request Towing
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('customer.store') }}" class="sidebar-link {% if 'store' in request.endpoint or 'cart' in request.endpoint or 'checkout' in request.endpoint %}active{% endif %}">
+            <i class="fas fa-basket-shopping text-success"></i> Auto Parts Store
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('customer.history') }}" class="sidebar-link {% if request.endpoint == 'customer.history' %}active{% endif %}">
+            <i class="fas fa-clock-rotate-left"></i> Service History
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('customer.orders') }}" class="sidebar-link {% if request.endpoint == 'customer.orders' %}active{% endif %}">
+            <i class="fas fa-box"></i> Product Orders
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('customer.profile') }}" class="sidebar-link {% if request.endpoint == 'customer.profile' %}active{% endif %}">
+            <i class="fas fa-user"></i> My Profile
+          </a>
+        </li>
+      </ul>
+
+      <!-- SOS Emergency Button -->
+      <div class="mt-auto pt-4 border-top border-secondary border-opacity-25">
+        <form action="{{ url_for('customer.sos_panic') }}" method="POST">
+          <input type="hidden" name="pickup_address" value="Current GPS Emergency Location">
+          <input type="hidden" name="pickup_lat" value="12.9716">
+          <input type="hidden" name="pickup_lng" value="77.5946">
+          <button type="submit" class="btn btn-sos w-100 d-flex align-items-center justify-content-center gap-2">
+            <i class="fas fa-triangle-exclamation fs-5"></i> SOS PANIC
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-content">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+              <i class="fas fa-circle-check me-2"></i>{{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      {% block customer_content %}{% endblock %}
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/map.js') }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

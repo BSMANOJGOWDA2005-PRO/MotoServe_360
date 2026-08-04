@@ -1,0 +1,79 @@
+{% extends 'customer/base_customer.html' %}
+
+{% block title %}Checkout - MotoServe 360{% endblock %}
+
+{% block customer_content %}
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="glass-card p-4">
+      <h4 class="fw-bold text-white mb-4"><i class="fas fa-truck-fast text-primary me-2"></i>Shipping & Payment Details</h4>
+
+      <form action="{{ url_for('customer.checkout') }}" method="POST">
+        <div class="mb-3">
+          <label class="form-label text-white small">Recipient Name</label>
+          <input type="text" class="form-control" value="{{ current_user.name }}" readonly>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-white small">Shipping Address</label>
+          <textarea name="shipping_address" class="form-control" rows="3" placeholder="Enter complete doorstep delivery address..." required>124, 4th Main Road, Indiranagar, Bengaluru - 560038</textarea>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label text-white small">Payment Method</label>
+          <div class="d-flex flex-column gap-2">
+            <div class="p-3 rounded-3 bg-dark border border-secondary border-opacity-25 form-check">
+              <input class="form-check-input" type="radio" name="payment_method" id="pay_upi" value="upi" checked>
+              <label class="form-check-label text-white ms-2" for="pay_upi">
+                <i class="fas fa-qrcode text-warning me-2"></i>UPI (Google Pay / PhonePe / Paytm)
+              </label>
+            </div>
+            <div class="p-3 rounded-3 bg-dark border border-secondary border-opacity-25 form-check">
+              <input class="form-check-input" type="radio" name="payment_method" id="pay_card" value="card">
+              <label class="form-check-label text-white ms-2" for="pay_card">
+                <i class="fas fa-credit-card text-primary me-2"></i>Credit / Debit Card
+              </label>
+            </div>
+            <div class="p-3 rounded-3 bg-dark border border-secondary border-opacity-25 form-check">
+              <input class="form-check-input" type="radio" name="payment_method" id="pay_cash" value="cash">
+              <label class="form-check-label text-white ms-2" for="pay_cash">
+                <i class="fas fa-money-bill-wave text-success me-2"></i>Cash on Delivery (COD)
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-success w-100 py-3 fw-bold fs-5">
+          <i class="fas fa-lock me-2"></i>Place Order (₹{{ total_amount }})
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="glass-card p-4">
+      <h5 class="fw-bold text-white mb-3">Items in Your Order</h5>
+      <div class="d-flex flex-column gap-3 mb-4">
+        {% for item in cart_items %}
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+              <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;">
+              <div>
+                <div class="fw-bold text-white small text-truncate" style="max-width: 180px;">{{ item.product.name }}</div>
+                <div class="small text-muted">Qty: {{ item.quantity }}</div>
+              </div>
+            </div>
+            <span class="fw-bold text-success">₹{{ item.item_total }}</span>
+          </div>
+        {% endfor %}
+      </div>
+
+      <hr class="border-secondary mb-3">
+      <div class="d-flex justify-content-between fw-bold text-white fs-5">
+        <span>Grand Total:</span>
+        <span class="text-success">₹{{ total_amount }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends 'customer/base_customer.html' %}
+
+{% block title %}Book Vehicle Repair - Customer Portal{% endblock %}
+
+{% block customer_content %}
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="glass-card p-4">
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="icon-wrapper icon-repair m-0" style="width: 45px; height: 45px; font-size: 1.2rem;"><i class="fas fa-wrench"></i></div>
+        <div>
+          <h4 class="fw-bold text-white mb-0">Book On-Site Mechanic</h4>
+          <p class="text-muted small mb-0">Certified mechanics for roadside assistance & repairs</p>
+        </div>
+      </div>
+
+      <form action="{{ url_for('customer.request_repair') }}" method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label class="form-label text-white small">Select Vehicle</label>
+          <select name="vehicle_id" class="form-select">
+            <option value="">-- General Request --</option>
+            {% for v in vehicles %}
+              <option value="{{ v.id }}">{{ v.make }} {{ v.model }} ({{ v.license_plate }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-white small">Problem Category</label>
+          <select name="problem_category" class="form-select" required>
+            <option value="Engine Breakdown">Engine Breakdown / Overheating</option>
+            <option value="Flat Tyre">Flat Tyre / Puncture</option>
+            <option value="Battery Jumpstart">Battery Dead / Jumpstart Required</option>
+            <option value="Brake Issue">Brake Failure / Fluid Leak</option>
+            <option value="Electrical Issue">Electrical & Lights Failure</option>
+            <option value="General Inspection">General Diagnostic Inspection</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-white small">Describe the Issue</label>
+          <textarea name="problem_description" class="form-control" rows="3" placeholder="Describe symptoms (e.g. Strange noise from engine, car won't start)" required></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-white small">Upload Photo of Problem / Vehicle (Optional)</label>
+          <input type="file" name="photo" class="form-control" accept="image/*">
+        </div>
+
+        <!-- Location -->
+        <div class="mb-3">
+          <label class="form-label text-white small">Breakdown Location</label>
+          <input type="text" name="pickup_address" id="pickup_address" class="form-control" value="Indiranagar 100ft Road, Bengaluru" required>
+        </div>
+
+        <input type="hidden" name="pickup_lat" id="pickup_lat" value="12.9784">
+        <input type="hidden" name="pickup_lng" id="pickup_lng" value="77.6408">
+
+        <div class="p-3 rounded-3 bg-dark border border-secondary border-opacity-25 mb-4">
+          <div class="d-flex justify-content-between text-white fw-bold">
+            <span>Base Inspection Fee:</span>
+            <span class="text-primary">₹250.00</span>
+          </div>
+          <div class="small text-muted mt-1">* Final repair costs for replaced parts will be confirmed on-site by mechanic.</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary-gradient w-100 py-2.5"><i class="fas fa-paper-plane me-2"></i>Book Nearest Mechanic</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="glass-card p-4">
+      <h5 class="fw-bold text-white mb-2"><i class="fas fa-map-location-dot text-primary me-2"></i>Breakdown Location Map</h5>
+      <p class="text-muted small mb-3">Set exact spot where your vehicle is currently located.</p>
+      <div id="repair-map" style="height: 440px; border-radius: 12px;"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const map = initMap('repair-map', 12.9784, 77.6408, 14);
+  if (map) {
+    setPickupLocationPicker(map, 'pickup_lat', 'pickup_lng', 'pickup_address');
+  }
+});
+</script>
+{% endblock %}

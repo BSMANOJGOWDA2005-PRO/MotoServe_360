@@ -1,0 +1,92 @@
+{% extends 'provider/base_provider.html' %}
+
+{% block title %}Active Job Console - Request #{{ req.request_number }}{% endblock %}
+
+{% block provider_content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="glass-card p-4 mb-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h4 class="fw-bold text-white mb-0">Active Service Console</h4>
+          <span class="small text-muted">Job #{{ req.request_number }} • {{ req.service_type|upper }}</span>
+        </div>
+        <span class="badge badge-status badge-{{ req.status }} fs-6">{{ req.status }}</span>
+      </div>
+
+      <div id="provider-job-map" style="height: 420px; border-radius: 12px;"></div>
+    </div>
+
+    <!-- Status Advance Controls -->
+    <div class="glass-card p-4">
+      <h5 class="fw-bold text-white mb-3"><i class="fas fa-sliders text-warning me-2"></i>Update Service Progress</h5>
+      <p class="text-muted small mb-4">Click the next status stage as you travel, reach, work, and complete the job:</p>
+
+      <form action="{{ url_for('provider.update_status', request_id=req.id) }}" method="POST" class="d-flex flex-wrap gap-2">
+        <button type="submit" name="status" value="travelling" class="btn btn-outline-info flex-grow-1 {% if req.status == 'travelling' %}active{% endif %}">
+          <i class="fas fa-truck-fast me-1"></i> 1. Travelling
+        </button>
+        <button type="submit" name="status" value="reached" class="btn btn-outline-primary flex-grow-1 {% if req.status == 'reached' %}active{% endif %}">
+          <i class="fas fa-location-dot me-1"></i> 2. Reached Spot
+        </button>
+        <button type="submit" name="status" value="working" class="btn btn-outline-warning flex-grow-1 {% if req.status == 'working' %}active{% endif %}">
+          <i class="fas fa-wrench me-1"></i> 3. Working
+        </button>
+        <button type="submit" name="status" value="completed" class="btn btn-success flex-grow-1 fw-bold {% if req.status == 'completed' %}active{% endif %}">
+          <i class="fas fa-circle-check me-1"></i> 4. Mark Completed
+        </button>
+        <button type="submit" name="status" value="cancelled" class="btn btn-outline-danger" onclick="return confirm('Cancel this job?');">
+          Cancel
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <!-- Customer Info Card -->
+    <div class="glass-card p-4 mb-4">
+      <h5 class="fw-bold text-white mb-3"><i class="fas fa-user-gear text-primary me-2"></i>Customer Details</h5>
+      <div class="mb-3">
+        <div class="fw-bold text-white fs-5">{{ req.customer.name }}</div>
+        <div class="text-muted small"><i class="fas fa-phone me-1"></i> {{ req.customer.phone }}</div>
+      </div>
+
+      <div class="p-3 rounded-3 bg-dark border border-secondary border-opacity-25 mb-4">
+        <div class="small text-muted mb-1">Pickup Address:</div>
+        <div class="fw-medium text-white small mb-2">{{ req.pickup_address }}</div>
+        {% if req.drop_address %}
+          <div class="small text-muted mb-1">Drop Destination:</div>
+          <div class="fw-medium text-white small">{{ req.drop_address }}</div>
+        {% endif %}
+      </div>
+
+      <div class="d-grid gap-2">
+        <a href="tel:{{ req.customer.phone }}" class="btn btn-outline-success"><i class="fas fa-phone me-2"></i>Call Customer</a>
+        <a href="{{ url_for('customer.chat', request_id=req.id) }}" class="btn btn-outline-primary"><i class="fas fa-comments me-2"></i>In-App Chat</a>
+      </div>
+    </div>
+
+    <!-- Job Payout Card -->
+    <div class="glass-card p-4">
+      <h5 class="fw-bold text-white mb-3">Job Payout</h5>
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="text-muted">Total Fee:</span>
+        <span class="fs-3 fw-bold text-success">₹{{ req.final_amount }}</span>
+      </div>
+      <div class="small text-muted mt-2">Payment Status: <span class="badge bg-secondary">{{ req.payment_status }}</span></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const map = initMap('provider-job-map', {{ req.pickup_lat }}, {{ req.pickup_lng }}, 14);
+  if (map) {
+    const custIcon = createCustomIcon('fas fa-user-pin', '#3b82f6');
+    L.marker([{{ req.pickup_lat }}, {{ req.pickup_lng }}], { icon: custIcon }).addTo(map).bindPopup("Customer Spot").openPopup();
+  }
+});
+</script>
+{% endblock %}

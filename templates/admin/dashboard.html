@@ -1,0 +1,135 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block title %}Admin Dashboard - Analytics & Overview{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h3 class="fw-bold text-white mb-1">Executive Operations Dashboard 📊</h3>
+    <p class="text-muted small mb-0">Real-time metrics for platform revenue, service requests & provider onboarding</p>
+  </div>
+  <a href="{{ url_for('admin.backup_db') }}" class="btn btn-outline-warning btn-sm fw-bold">
+    <i class="fas fa-download me-1"></i> Download DB Backup
+  </a>
+</div>
+
+<!-- Key Financial & Operational Metric Cards -->
+<div class="row g-4 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div>
+        <div class="text-muted small">Total Platform Revenue</div>
+        <div class="fs-3 fw-bold text-success">₹{{ total_revenue }}</div>
+      </div>
+      <div class="stat-icon bg-icon-success"><i class="fas fa-indian-rupee-sign"></i></div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div>
+        <div class="text-muted small">Active Customers</div>
+        <div class="fs-3 fw-bold text-white">{{ total_customers }}</div>
+      </div>
+      <div class="stat-icon bg-icon-primary"><i class="fas fa-users"></i></div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div>
+        <div class="text-muted small">Verified Providers</div>
+        <div class="fs-3 fw-bold text-white">{{ total_providers }}</div>
+      </div>
+      <div class="stat-icon bg-icon-warning"><i class="fas fa-truck-pickup"></i></div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div>
+        <div class="text-muted small">Pending Approvals</div>
+        <div class="fs-3 fw-bold text-danger">{{ pending_providers }}</div>
+      </div>
+      <div class="stat-icon bg-icon-danger"><i class="fas fa-user-clock"></i></div>
+    </div>
+  </div>
+</div>
+
+<!-- Chart Visualizations -->
+<div class="row g-4 mb-4">
+  <div class="col-lg-8">
+    <div class="glass-card p-4">
+      <h5 class="fw-bold text-white mb-3"><i class="fas fa-chart-line text-primary me-2"></i>Revenue Growth (Monthly Trend)</h5>
+      <canvas id="revenueLineChart" height="120"></canvas>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="glass-card p-4">
+      <h5 class="fw-bold text-white mb-3"><i class="fas fa-chart-pie text-warning me-2"></i>Service Breakdown</h5>
+      <canvas id="servicesPieChart" height="200"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Pending Provider Applications Table -->
+{% if recent_providers %}
+  <div class="glass-card p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold text-white mb-0"><i class="fas fa-user-check text-warning me-2"></i>Pending Provider Applications</h5>
+      <a href="{{ url_for('admin.providers', status='pending') }}" class="small text-primary text-decoration-none">Manage All</a>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-dark table-hover align-middle mb-0">
+        <thead>
+          <tr class="text-muted small">
+            <th>Business Name</th>
+            <th>Owner</th>
+            <th>Type</th>
+            <th>License #</th>
+            <th>Document</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in recent_providers %}
+            <tr>
+              <td class="fw-bold text-white">{{ p.business_name }}</td>
+              <td>{{ p.user.name }} ({{ p.user.phone }})</td>
+              <td><span class="badge bg-warning text-dark text-uppercase">{{ p.provider_type }}</span></td>
+              <td class="small">{{ p.license_number }}</td>
+              <td>
+                {% if p.document_url %}
+                  <a href="{{ url_for('static', filename='uploads/' + p.document_url) }}" target="_blank" class="btn btn-sm btn-outline-info"><i class="fas fa-file-pdf"></i> View Proof</a>
+                {% else %}
+                  <span class="text-muted small">No File</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="d-flex gap-2">
+                  <form action="{{ url_for('admin.provider_action', provider_id=p.id, action='approve') }}" method="POST">
+                    <button type="submit" class="btn btn-sm btn-success px-3"><i class="fas fa-check me-1"></i> Approve</button>
+                  </form>
+                  <form action="{{ url_for('admin.provider_action', provider_id=p.id, action='reject') }}" method="POST">
+                    <button type="submit" class="btn btn-sm btn-danger px-3"><i class="fas fa-times me-1"></i> Reject</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  initAdminCharts();
+});
+</script>
+{% endblock %}
