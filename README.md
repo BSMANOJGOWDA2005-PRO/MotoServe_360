@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # MotoServe 360
 
 Integrated Fuel Delivery, Vehicle Repair, Towing and Vehicle Products Management System built with **Python 3.12, Flask, SQLAlchemy, Bootstrap 5, Leaflet JS, and Chart.js**.
@@ -113,3 +114,6 @@ MotoServe360/
     ├── provider/
     └── admin/
 ```
+=======
+# MotoServe_360
+>>>>>>> 16be992660c6907c43d9d93c0eb027ecf9e8fddf
