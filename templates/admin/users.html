@@ -43,11 +43,18 @@
               <td class="small text-muted">{{ u.created_at.strftime('%b %d, %Y') }}</td>
               <td>
                 {% if u.id != current_user.id %}
-                  <form action="{{ url_for('admin.toggle_user_status', user_id=u.id) }}" method="POST">
-                    <button type="submit" class="btn btn-sm {% if u.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
-                      {% if u.is_active %}Deactivate{% else %}Activate{% endif %}
-                    </button>
-                  </form>
+                  <div class="d-flex align-items-center gap-1">
+                    <form action="{{ url_for('admin.toggle_user_status', user_id=u.id) }}" method="POST">
+                      <button type="submit" class="btn btn-sm {% if u.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}" title="Toggle Active Status">
+                        {% if u.is_active %}Deactivate{% else %}Activate{% endif %}
+                      </button>
+                    </form>
+                    <form action="{{ url_for('admin.delete_user', user_id=u.id) }}" method="POST" onsubmit="return confirm('⚠️ SCAM / FRAUD WARNING:\nAre you sure you want to permanently DELETE user account \'{{ u.email }}\' from the database? This cannot be undone.');">
+                      <button type="submit" class="btn btn-sm btn-danger" title="Delete Account Permanently">
+                        <i class="fas fa-trash me-1"></i>Delete Account
+                      </button>
+                    </form>
+                  </div>
                 {% else %}
                   <span class="small text-muted">Self (You)</span>
                 {% endif %}

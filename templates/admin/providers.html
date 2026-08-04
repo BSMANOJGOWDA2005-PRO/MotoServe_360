@@ -48,20 +48,23 @@
               <td>
                 <div class="btn-group btn-group-sm">
                   {% if p.status != 'approved' %}
-                    <form action="{{ url_for('admin.provider_action', provider_id=p.id, action='approve') }}" method="POST">
+                    <form action="{{ url_for('admin.provider_action', provider_id=p.id, action='approve') }}" method="POST" class="d-inline">
                       <button type="submit" class="btn btn-success" title="Approve"><i class="fas fa-check"></i></button>
                     </form>
                   {% endif %}
                   {% if p.status != 'rejected' %}
-                    <form action="{{ url_for('admin.provider_action', provider_id=p.id, action='reject') }}" method="POST">
+                    <form action="{{ url_for('admin.provider_action', provider_id=p.id, action='reject') }}" method="POST" class="d-inline">
                       <button type="submit" class="btn btn-warning" title="Reject"><i class="fas fa-xmark"></i></button>
                     </form>
                   {% endif %}
                   {% if p.status != 'suspended' %}
-                    <form action="{{ url_for('admin.provider_action', provider_id=p.id, action='suspend') }}" method="POST">
-                      <button type="submit" class="btn btn-danger" title="Suspend"><i class="fas fa-ban"></i></button>
+                    <form action="{{ url_for('admin.provider_action', provider_id=p.id, action='suspend') }}" method="POST" class="d-inline">
+                      <button type="submit" class="btn btn-secondary" title="Suspend"><i class="fas fa-ban"></i></button>
                     </form>
                   {% endif %}
+                  <form action="{{ url_for('admin.provider_action', provider_id=p.id, action='delete') }}" method="POST" class="d-inline" onsubmit="return confirm('⚠️ SCAM / FRAUD WARNING:\nAre you sure you want to permanently DELETE provider account \'{{ p.business_name }}\' from the database? This cannot be undone.');">
+                    <button type="submit" class="btn btn-danger" title="Delete Provider Account Permanently"><i class="fas fa-trash"></i></button>
+                  </form>
                 </div>
               </td>
             </tr>

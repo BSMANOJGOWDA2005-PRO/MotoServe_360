@@ -5,7 +5,8 @@ from flask_login import login_required, current_user
 from datetime import datetime, timedelta
 
 from models import (
-    User, ProviderProfile, ServiceRequest, Product, Order, Payment, Review, AdminLog
+    User, ProviderProfile, ServiceRequest, FuelDetails, RepairDetails, TowDetails,
+    Product, Order, OrderItem, Payment, Review, Notification, ChatMessage, AdminLog, CartItem, Vehicle
 )
 from services import create_notification
 from extensions import db
@@ -107,11 +108,75 @@ def providers():
     providers_list = query.order_by(ProviderProfile.created_at.desc()).all()
     return render_template('admin/providers.html', providers=providers_list, status_filter=status_filter)
 
+def delete_user_account(user_id):
+    user = User.query.get_or_404(user_id)
+
+    # 1. Delete Notifications & Admin Logs
+    Notification.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+    AdminLog.query.filter_by(admin_id=user_id).delete(synchronize_session=False)
+
+    # 2. Delete Chat Messages
+    ChatMessage.query.filter_by(sender_id=user_id).delete(synchronize_session=False)
+
+    # 3. Delete Cart Items & Payments
+    CartItem.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+    Payment.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+
+    # 4. Handle Provider Profile & Reviews if Provider
+    if user.provider_profile:
+        pid = user.provider_profile.id
+        Review.query.filter_by(provider_id=pid).delete(synchronize_session=False)
+        p_requests = ServiceRequest.query.filter_by(provider_id=pid).all()
+        for req in p_requests:
+            FuelDetails.query.filter_by(request_id=req.id).delete(synchronize_session=False)
+            RepairDetails.query.filter_by(request_id=req.id).delete(synchronize_session=False)
+            TowDetails.query.filter_by(request_id=req.id).delete(synchronize_session=False)
+            Review.query.filter_by(request_id=req.id).delete(synchronize_session=False)
+            Payment.query.filter_by(request_id=req.id).delete(synchronize_session=False)
+            ChatMessage.query.filter_by(request_id=req.id).delete(synchronize_session=False)
+            db.session.delete(req)
+        ProviderProfile.query.filter_by(id=pid).delete(synchronize_session=False)
+
+    # 5. Handle Customer Service Requests & Reviews
+    c_requests = ServiceRequest.query.filter_by(customer_id=user_id).all()
+    for req in c_requests:
+        FuelDetails.query.filter_by(request_id=req.id).delete(synchronize_session=False)
+        RepairDetails.query.filter_by(request_id=req.id).delete(synchronize_session=False)
+        TowDetails.query.filter_by(request_id=req.id).delete(synchronize_session=False)
+        Review.query.filter_by(request_id=req.id).delete(synchronize_session=False)
+        Payment.query.filter_by(request_id=req.id).delete(synchronize_session=False)
+        ChatMessage.query.filter_by(request_id=req.id).delete(synchronize_session=False)
+        db.session.delete(req)
+
+    Review.query.filter_by(customer_id=user_id).delete(synchronize_session=False)
+
+    # 6. Delete Orders & Order Items
+    orders = Order.query.filter_by(customer_id=user_id).all()
+    for ord in orders:
+        OrderItem.query.filter_by(order_id=ord.id).delete(synchronize_session=False)
+        Payment.query.filter_by(order_id=ord.id).delete(synchronize_session=False)
+        db.session.delete(ord)
+
+    # 7. Delete Vehicles
+    Vehicle.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+
+    # 8. Delete User Record
+    db.session.delete(user)
+    db.session.commit()
+
 @admin_bp.route('/provider/action/<int:provider_id>/<action>', methods=['POST'])
 @login_required
 @admin_required
 def provider_action(provider_id, action):
     provider = ProviderProfile.query.get_or_404(provider_id)
+    if action == 'delete':
+        bname = provider.business_name
+        uid = provider.user_id
+        delete_user_account(uid)
+        log_admin_action("Delete Provider", f"Permanently deleted provider account {bname} (User ID: {uid})")
+        flash(f'Provider "{bname}" has been permanently deleted from database.', 'danger')
+        return redirect(url_for('admin.providers'))
+
     if action == 'approve':
         provider.status = 'approved'
         create_notification(provider.user_id, "Application Approved! 🎉", "Your provider application has been approved. You can now start accepting service requests.")
@@ -151,6 +216,21 @@ def toggle_user_status(user_id):
     db.session.commit()
     log_admin_action("Toggle User Status", f"Updated active status for user {user.email} to {user.is_active}")
     flash(f"User {user.email} {'activated' if user.is_active else 'deactivated'}.", 'info')
+    return redirect(url_for('admin.users'))
+
+@admin_bp.route('/user/delete/<int:user_id>', methods=['POST'])
+@login_required
+@admin_required
+def delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.id == current_user.id:
+        flash('You cannot delete your own admin account.', 'danger')
+        return redirect(url_for('admin.users'))
+    email = user.email
+    name = user.name
+    delete_user_account(user.id)
+    log_admin_action("Delete User Account", f"Permanently deleted user account {name} ({email}) from database")
+    flash(f'User account "{name} ({email})" has been permanently deleted from database.', 'danger')
     return redirect(url_for('admin.users'))
 
 

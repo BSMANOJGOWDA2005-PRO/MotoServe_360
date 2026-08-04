@@ -211,3 +211,25 @@ footer {
   background: #090d16;
   border-top: 1px solid var(--dark-border);
 }
+
+/* High-Contrast Table Styling */
+.table-dark {
+  --bs-table-bg: rgba(15, 23, 42, 0.6);
+  --bs-table-striped-bg: rgba(30, 41, 59, 0.5);
+  color: #f8fafc;
+}
+
+.table-dark th {
+  color: #cbd5e1 !important;
+  font-weight: 700;
+  border-bottom: 2px solid var(--dark-border);
+}
+
+.table-dark td {
+  color: #f1f5f9;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.table-dark .text-muted {
+  color: #e2e8f0 !important;
+}
