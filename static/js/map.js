@@ -29,6 +29,28 @@ function createCustomIcon(iconClass, color) {
   });
 }
 
+function fetchPlaceName(lat, lng, addressInputId) {
+  if (!addressInputId) return;
+  const addressInput = document.getElementById(addressInputId);
+  if (!addressInput) return;
+
+  addressInput.value = "📍 Fetching location name...";
+
+  fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data && data.display_name) {
+        addressInput.value = data.display_name;
+      } else {
+        addressInput.value = `GPS Location: (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+      }
+    })
+    .catch(err => {
+      console.warn("Reverse geocoding error:", err);
+      addressInput.value = `GPS Location: (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+    });
+}
+
 function setPickupLocationPicker(map, latInputId, lngInputId, addressInputId) {
   const customerIcon = createCustomIcon('fas fa-user-pin', '#3b82f6');
   
@@ -37,21 +59,23 @@ function setPickupLocationPicker(map, latInputId, lngInputId, addressInputId) {
 
   userMarker = L.marker([currentLat, currentLng], { icon: customerIcon, draggable: true }).addTo(map);
 
+  // Fetch initial address if not already populated
+  const addrElem = document.getElementById(addressInputId);
+  if (addrElem && (!addrElem.value || addrElem.value.includes('GPS Location'))) {
+    fetchPlaceName(currentLat, currentLng, addressInputId);
+  }
+
   userMarker.on('dragend', function (e) {
     const coord = e.target.getLatLng();
     document.getElementById(latInputId).value = coord.lat.toFixed(6);
     document.getElementById(lngInputId).value = coord.lng.toFixed(6);
-    if (addressInputId) {
-      document.getElementById(addressInputId).value = `GPS: (${coord.lat.toFixed(4)}, ${coord.lng.toFixed(4)})`;
-    }
+    fetchPlaceName(coord.lat, coord.lng, addressInputId);
   });
 
   map.on('click', function (e) {
     userMarker.setLatLng(e.latlng);
     document.getElementById(latInputId).value = e.latlng.lat.toFixed(6);
     document.getElementById(lngInputId).value = e.latlng.lng.toFixed(6);
-    if (addressInputId) {
-      document.getElementById(addressInputId).value = `GPS Location: (${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)})`;
-    }
+    fetchPlaceName(e.latlng.lat, e.latlng.lng, addressInputId);
   });
 }
