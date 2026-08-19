@@ -5,7 +5,7 @@
 {% block provider_content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
   <div>
-    <h3 class="fw-bold text-white mb-1">{{ profile.business_name }} Dashboard 🛠️</h3>
+    <h3 class="fw-bold text-dark mb-1">{{ profile.business_name }} Dashboard 🛠️</h3>
     <p class="text-muted small mb-0">Type: <span class="badge bg-warning text-dark text-uppercase">{{ profile.provider_type }}</span> • Rating: <i class="fas fa-star text-warning"></i> {{ profile.rating }}</p>
   </div>
   <div>
@@ -23,7 +23,7 @@
     <div class="stat-card">
       <div>
         <div class="text-muted small">Total Earnings</div>
-        <div class="fs-3 fw-bold text-white">₹{{ total_earnings }}</div>
+        <div class="fs-3 fw-bold text-dark">₹{{ total_earnings }}</div>
       </div>
       <div class="stat-icon bg-icon-success"><i class="fas fa-wallet"></i></div>
     </div>
@@ -33,7 +33,7 @@
     <div class="stat-card">
       <div>
         <div class="text-muted small">Completed Jobs</div>
-        <div class="fs-3 fw-bold text-white">{{ completed_jobs_count }}</div>
+        <div class="fs-3 fw-bold text-dark">{{ completed_jobs_count }}</div>
       </div>
       <div class="stat-icon bg-icon-primary"><i class="fas fa-circle-check"></i></div>
     </div>
@@ -43,7 +43,7 @@
     <div class="stat-card">
       <div>
         <div class="text-muted small">Average Rating</div>
-        <div class="fs-3 fw-bold text-white">{{ profile.rating }} / 5.0</div>
+        <div class="fs-3 fw-bold text-dark">{{ profile.rating }} / 5.0</div>
       </div>
       <div class="stat-icon bg-icon-warning"><i class="fas fa-star"></i></div>
     </div>
@@ -53,7 +53,7 @@
     <div class="stat-card">
       <div>
         <div class="text-muted small">Pending Requests</div>
-        <div class="fs-3 fw-bold text-white">{{ pending_requests|length }}</div>
+        <div class="fs-3 fw-bold text-dark">{{ pending_requests|length }}</div>
       </div>
       <div class="stat-icon bg-icon-danger"><i class="fas fa-bell"></i></div>
     </div>
@@ -79,13 +79,13 @@
 <!-- Pending Nearby Requests Table -->
 <div class="glass-card p-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h5 class="fw-bold text-white mb-0"><i class="fas fa-list text-warning me-2"></i>Incoming Nearby Requests</h5>
+    <h5 class="fw-bold text-dark mb-0"><i class="fas fa-list text-warning me-2"></i>Incoming Nearby Requests</h5>
     <a href="{{ url_for('provider.requests_list') }}" class="small text-primary text-decoration-none">View All</a>
   </div>
 
   {% if pending_requests %}
     <div class="table-responsive">
-      <table class="table table-dark table-hover align-middle">
+      <table class="table table-hover align-middle">
         <thead>
           <tr class="text-muted small">
             <th>Request Number</th>
@@ -99,7 +99,7 @@
         <tbody>
           {% for r in pending_requests %}
             <tr>
-              <td class="fw-bold text-white">{{ r.request_number }}</td>
+              <td class="fw-bold text-dark">{{ r.request_number }}</td>
               <td>{{ r.customer.name }}</td>
               <td class="small text-truncate" style="max-width: 220px;">{{ r.pickup_address }}</td>
               <td class="fw-bold text-success">₹{{ r.final_amount }}</td>

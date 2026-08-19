@@ -8,36 +8,36 @@
     <div class="col-md-7 col-lg-6">
       <div class="glass-card p-4 p-md-5">
         <div class="text-center mb-4">
-          <h3 class="fw-bold text-white"><i class="fas fa-handshake text-warning me-2"></i>Join MotoServe Provider Network</h3>
+          <h3 class="fw-bold text-dark"><i class="fas fa-handshake text-warning me-2"></i>Join MotoServe Provider Network</h3>
           <p class="text-muted small">Offer Fuel Delivery, Garage Mechanic, or Towing services</p>
         </div>
 
         <form action="{{ url_for('auth.register_provider') }}" method="POST" enctype="multipart/form-data">
           <div class="row g-3 mb-3">
             <div class="col-md-6">
-              <label class="form-label text-white small">Owner Name</label>
+              <label class="form-label text-dark small">Owner Name</label>
               <input type="text" name="name" class="form-control" placeholder="Rajesh Kumar" required>
             </div>
             <div class="col-md-6">
-              <label class="form-label text-white small">Business Name</label>
+              <label class="form-label text-dark small">Business Name</label>
               <input type="text" name="business_name" class="form-control" placeholder="Express Fuel Tankers" required>
             </div>
           </div>
 
           <div class="row g-3 mb-3">
             <div class="col-md-6">
-              <label class="form-label text-white small">Email Address</label>
+              <label class="form-label text-dark small">Email Address</label>
               <input type="email" name="email" class="form-control" placeholder="partner@example.com" required>
             </div>
             <div class="col-md-6">
-              <label class="form-label text-white small">Phone Number</label>
+              <label class="form-label text-dark small">Phone Number</label>
               <input type="tel" name="phone" class="form-control" placeholder="+91 9811122233" required>
             </div>
           </div>
 
           <div class="row g-3 mb-3">
             <div class="col-md-6">
-              <label class="form-label text-white small">Provider Type</label>
+              <label class="form-label text-dark small">Provider Type</label>
               <select name="provider_type" class="form-select" required>
                 <option value="fuel">Fuel Delivery Agent</option>
                 <option value="mechanic">Vehicle Mechanic</option>
@@ -45,19 +45,19 @@
               </select>
             </div>
             <div class="col-md-6">
-              <label class="form-label text-white small">License / Reg Number</label>
+              <label class="form-label text-dark small">License / Reg Number</label>
               <input type="text" name="license_number" class="form-control" placeholder="FL-99201-IND" required>
             </div>
           </div>
 
           <div class="mb-3">
-            <label class="form-label text-white small">Upload Verification Document (PDF / Image)</label>
+            <label class="form-label text-dark small">Upload Verification Document (PDF / Image)</label>
             <input type="file" name="document" class="form-control" accept=".pdf,.png,.jpg,.jpeg">
             <div class="form-text text-muted small">Upload your business license or ID proof for admin verification.</div>
           </div>
 
           <div class="mb-4">
-            <label class="form-label text-white small">Password</label>
+            <label class="form-label text-dark small">Password</label>
             <input type="password" name="password" class="form-control" placeholder="Minimum 6 characters" required>
           </div>
 

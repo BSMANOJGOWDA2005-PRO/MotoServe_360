@@ -13,6 +13,7 @@ class User(UserMixin, db.Model):
     phone = db.Column(db.String(20), nullable=False)
     role = db.Column(db.String(20), nullable=False, default='customer') # 'customer', 'provider', 'admin'
     avatar = db.Column(db.String(255), default='default_avatar.png')
+    license_number = db.Column(db.String(50), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=True)
 

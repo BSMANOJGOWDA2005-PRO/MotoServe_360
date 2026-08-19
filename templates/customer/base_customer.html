@@ -19,7 +19,7 @@
 <body>
 
   <!-- Top Navigation Bar -->
-  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
+  <nav class="navbar navbar-expand-lg navbar-light navbar-custom sticky-top">
     <div class="container-fluid px-4">
       <a class="navbar-brand me-4" href="{{ url_for('customer.dashboard') }}">
         <i class="fas fa-cubes-stacked me-2 text-primary"></i>MotoServe<span>360</span>
@@ -27,8 +27,8 @@
 
       <div class="d-flex align-items-center gap-3 ms-auto">
         <!-- Cart Badge -->
-        <a href="{{ url_for('customer.view_cart') }}" class="btn btn-outline-light position-relative btn-sm px-3">
-          <i class="fas fa-cart-shopping"></i>
+        <a href="{{ url_for('customer.view_cart') }}" class="btn btn-white-custom position-relative btn-sm px-3">
+          <i class="fas fa-cart-shopping text-primary"></i>
           {% if cart_items_count > 0 %}
             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">
               {{ cart_items_count }}
@@ -37,8 +37,8 @@
         </a>
 
         <!-- Notifications Badge -->
-        <a href="{{ url_for('customer.notifications') }}" class="btn btn-outline-light position-relative btn-sm px-3">
-          <i class="fas fa-bell"></i>
+        <a href="{{ url_for('customer.notifications') }}" class="btn btn-white-custom position-relative btn-sm px-3">
+          <i class="fas fa-bell text-warning"></i>
           {% if unread_notifications_count > 0 %}
             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
               {{ unread_notifications_count }}
@@ -48,10 +48,10 @@
 
         <!-- User Profile Dropdown -->
         <div class="dropdown">
-          <button class="btn btn-outline-secondary dropdown-toggle text-white border-0 bg-dark" type="button" data-bs-toggle="dropdown">
+          <button class="btn btn-white-custom dropdown-toggle" type="button" data-bs-toggle="dropdown">
             <i class="fas fa-user-circle me-1 text-primary"></i> {{ current_user.name }}
           </button>
-          <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm">
             <li><a class="dropdown-item" href="{{ url_for('customer.profile') }}"><i class="fas fa-id-card me-2"></i>My Profile</a></li>
             <li><a class="dropdown-item" href="{{ url_for('customer.vehicles') }}"><i class="fas fa-car me-2"></i>My Vehicles</a></li>
             <li><hr class="dropdown-divider"></li>

@@ -1,5 +1,7 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
+import os
+from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify, current_app
 from flask_login import login_required, current_user
+from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from sqlalchemy import func
 
@@ -187,6 +189,15 @@ def profile():
         profile.license_number = request.form.get('license_number')
         current_user.name = request.form.get('name')
         current_user.phone = request.form.get('phone')
+
+        if 'avatar' in request.files:
+            file = request.files['avatar']
+            if file and file.filename != '':
+                filename = secure_filename(file.filename)
+                avatar_filename = f"avatar_provider_{current_user.id}_{filename}"
+                file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], avatar_filename))
+                current_user.avatar = avatar_filename
+
         db.session.commit()
         flash('Provider profile updated successfully!', 'success')
         return redirect(url_for('provider.profile'))

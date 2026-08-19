@@ -578,6 +578,16 @@ def profile():
     if request.method == 'POST':
         current_user.name = request.form.get('name')
         current_user.phone = request.form.get('phone')
+        current_user.license_number = request.form.get('license_number')
+
+        if 'avatar' in request.files:
+            file = request.files['avatar']
+            if file and file.filename != '':
+                filename = secure_filename(file.filename)
+                avatar_filename = f"avatar_user_{current_user.id}_{filename}"
+                file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], avatar_filename))
+                current_user.avatar = avatar_filename
+
         db.session.commit()
         flash('Profile updated successfully!', 'success')
         return redirect(url_for('customer.profile'))

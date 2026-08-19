@@ -5,9 +5,9 @@
 {% block admin_content %}
 <div class="glass-card p-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="fw-bold text-white mb-0"><i class="fas fa-truck-monster text-primary me-2"></i>Service Requests Overview</h4>
+    <h4 class="fw-bold text-dark mb-0"><i class="fas fa-truck-monster text-primary me-2"></i>Service Requests Overview</h4>
     <div class="btn-group btn-group-sm">
-      <a href="{{ url_for('admin.requests', service='all') }}" class="btn btn-outline-light {% if service_filter == 'all' %}active{% endif %}">All</a>
+      <a href="{{ url_for('admin.requests', service='all') }}" class="btn btn-white-custom {% if service_filter == 'all' %}active{% endif %}">All</a>
       <a href="{{ url_for('admin.requests', service='fuel') }}" class="btn btn-outline-warning {% if service_filter == 'fuel' %}active{% endif %}">Fuel</a>
       <a href="{{ url_for('admin.requests', service='repair') }}" class="btn btn-outline-primary {% if service_filter == 'repair' %}active{% endif %}">Repair</a>
       <a href="{{ url_for('admin.requests', service='tow') }}" class="btn btn-outline-danger {% if service_filter == 'tow' %}active{% endif %}">Towing</a>
@@ -16,7 +16,7 @@
 
   {% if requests %}
     <div class="table-responsive">
-      <table class="table table-dark table-hover align-middle">
+      <table class="table table-hover align-middle">
         <thead>
           <tr class="text-muted small">
             <th>Req #</th>
@@ -31,7 +31,7 @@
         <tbody>
           {% for r in requests %}
             <tr>
-              <td class="fw-bold text-white">{{ r.request_number }}</td>
+              <td class="fw-bold text-dark">{{ r.request_number }}</td>
               <td class="text-capitalize fw-semibold">{{ r.service_type }}</td>
               <td class="small">{{ r.customer.name }}</td>
               <td class="small">

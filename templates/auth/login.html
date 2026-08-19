@@ -8,19 +8,19 @@
     <div class="col-md-6 col-lg-5">
       <div class="glass-card p-4 p-md-5">
         <div class="text-center mb-4">
-          <h3 class="fw-bold text-white"><i class="fas fa-lock text-primary me-2"></i>Sign In</h3>
+          <h3 class="fw-bold text-dark"><i class="fas fa-lock text-primary me-2"></i>Sign In</h3>
           <p class="text-muted small">Enter your credentials to access your dashboard</p>
         </div>
 
         <form action="{{ url_for('auth.login') }}" method="POST">
           <div class="mb-3">
-            <label class="form-label text-white small">Email Address</label>
+            <label class="form-label text-dark small">Email Address</label>
             <input type="email" name="email" id="login-email" class="form-control" placeholder="name@example.com" required>
           </div>
 
           <div class="mb-3">
             <div class="d-flex justify-content-between">
-              <label class="form-label text-white small">Password</label>
+              <label class="form-label text-dark small">Password</label>
               <a href="{{ url_for('auth.forgot_password') }}" class="small text-primary text-decoration-none">Forgot Password?</a>
             </div>
             <input type="password" name="password" id="login-password" class="form-control" placeholder="••••••••" required>
@@ -34,13 +34,8 @@
           <button type="submit" class="btn btn-primary-gradient w-100 py-2.5 mb-3">Sign In</button>
         </form>
 
-        <div class="p-3 rounded-3 bg-dark border border-secondary border-opacity-25 text-center mt-4">
-          <div class="small fw-semibold text-white mb-2"><i class="fas fa-user-plus me-1 text-primary"></i> Create a New Account:</div>
-          <div class="d-flex flex-wrap justify-content-center gap-2 mt-2">
-            <a href="{{ url_for('auth.register_customer') }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-user me-1"></i>Customer</a>
-            <a href="{{ url_for('auth.register_provider') }}" class="btn btn-sm btn-outline-warning"><i class="fas fa-truck-pickup me-1"></i>Provider</a>
-            <a href="{{ url_for('auth.register_admin') }}" class="btn btn-sm btn-outline-danger"><i class="fas fa-shield-halved me-1"></i>Admin</a>
-          </div>
+        <div class="text-center mt-3">
+          <p class="text-muted small mb-0">Don't have an account? <a href="{{ url_for('auth.register_customer') }}" class="text-primary fw-semibold text-decoration-none">Sign Up</a></p>
         </div>
       </div>
     </div>

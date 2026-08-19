@@ -5,11 +5,11 @@
 {% block customer_content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
   <div>
-    <h3 class="fw-bold text-white mb-1">Welcome back, {{ current_user.name }} 👋</h3>
+    <h3 class="fw-bold text-dark mb-1">Welcome back, {{ current_user.name }} 👋</h3>
     <p class="text-muted small mb-0">What service do you need for your vehicle today?</p>
   </div>
-  <a href="{{ url_for('customer.vehicles') }}" class="btn btn-sm btn-outline-primary">
-    <i class="fas fa-plus me-1"></i> Manage Vehicles ({{ vehicles|length }})
+  <a href="{{ url_for('customer.vehicles') }}" class="btn btn-sm btn-white-custom">
+    <i class="fas fa-plus me-1 text-primary"></i> Manage Vehicles ({{ vehicles|length }})
   </a>
 </div>
 
@@ -22,7 +22,7 @@
           <div class="icon-wrapper icon-fuel m-0" style="width: 50px; height: 50px;"><i class="fas fa-gas-pump"></i></div>
           <span class="badge bg-warning bg-opacity-20 text-warning">Instant</span>
         </div>
-        <h5 class="fw-bold text-white mb-1">Fuel Delivery</h5>
+        <h5 class="fw-bold text-dark mb-1">Fuel Delivery</h5>
         <p class="text-muted small mb-0">Petrol, Diesel, CNG delivered directly to your tank.</p>
       </div>
     </a>
@@ -35,7 +35,7 @@
           <div class="icon-wrapper icon-repair m-0" style="width: 50px; height: 50px;"><i class="fas fa-wrench"></i></div>
           <span class="badge bg-primary bg-opacity-20 text-primary">On-Site</span>
         </div>
-        <h5 class="fw-bold text-white mb-1">Vehicle Repair</h5>
+        <h5 class="fw-bold text-dark mb-1">Vehicle Repair</h5>
         <p class="text-muted small mb-0">Mechanics for engine, brakes, battery, & tyres.</p>
       </div>
     </a>
@@ -48,7 +48,7 @@
           <div class="icon-wrapper icon-tow m-0" style="width: 50px; height: 50px;"><i class="fas fa-truck-pickup"></i></div>
           <span class="badge bg-danger bg-opacity-20 text-danger">24/7 Recovery</span>
         </div>
-        <h5 class="fw-bold text-white mb-1">Towing Service</h5>
+        <h5 class="fw-bold text-dark mb-1">Towing Service</h5>
         <p class="text-muted small mb-0">Flatbed and wheel-lift towing for breakdowns.</p>
       </div>
     </a>
@@ -61,7 +61,7 @@
           <div class="icon-wrapper icon-store m-0" style="width: 50px; height: 50px;"><i class="fas fa-basket-shopping"></i></div>
           <span class="badge bg-success bg-opacity-20 text-success">Genuine Parts</span>
         </div>
-        <h5 class="fw-bold text-white mb-1">Auto Products</h5>
+        <h5 class="fw-bold text-dark mb-1">Auto Products</h5>
         <p class="text-muted small mb-0">Engine oils, batteries, tyres, helmets & gear.</p>
       </div>
     </a>
@@ -73,13 +73,13 @@
   <div class="col-lg-8">
     <div class="glass-card p-4 h-100">
       <div class="d-flex justify-content-between align-items-center mb-4">
-        <h5 class="fw-bold text-white mb-0"><i class="fas fa-spinner fa-spin text-primary me-2"></i>Active Service Requests</h5>
+        <h5 class="fw-bold text-dark mb-0"><i class="fas fa-spinner fa-spin text-primary me-2"></i>Active Service Requests</h5>
         <a href="{{ url_for('customer.history') }}" class="small text-primary text-decoration-none">View Full History</a>
       </div>
 
       {% if active_requests %}
         <div class="table-responsive">
-          <table class="table table-dark table-hover align-middle mb-0">
+          <table class="table table-hover align-middle mb-0">
             <thead>
               <tr class="text-muted small">
                 <th>Request ID</th>
@@ -92,7 +92,7 @@
             <tbody>
               {% for req in active_requests %}
                 <tr>
-                  <td class="fw-bold text-white">{{ req.request_number }}</td>
+                  <td class="fw-bold text-dark">{{ req.request_number }}</td>
                   <td>
                     <span class="text-capitalize fw-semibold text-{% if req.service_type == 'fuel' %}warning{% elif req.service_type == 'repair' %}primary{% else %}danger{% endif %}">
                       <i class="fas fa-{% if req.service_type == 'fuel' %}gas-pump{% elif req.service_type == 'repair' %}wrench{% else %}truck-pickup{% endif %} me-1"></i>
@@ -124,15 +124,15 @@
     <!-- Registered Vehicles Widget -->
     <div class="glass-card p-4 mb-4">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="fw-bold text-white mb-0"><i class="fas fa-car text-primary me-2"></i>My Vehicles</h5>
+        <h5 class="fw-bold text-dark mb-0"><i class="fas fa-car text-primary me-2"></i>My Vehicles</h5>
         <a href="{{ url_for('customer.vehicles') }}" class="small text-primary text-decoration-none">+ Add</a>
       </div>
       {% if vehicles %}
         <div class="d-flex flex-column gap-2">
           {% for v in vehicles %}
-            <div class="p-3 rounded-3 bg-dark border border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+            <div class="p-3 rounded-3 bg-light border border-slate-200 d-flex justify-content-between align-items-center">
               <div>
-                <div class="fw-bold text-white">{{ v.make }} {{ v.model }}</div>
+                <div class="fw-bold text-dark">{{ v.make }} {{ v.model }}</div>
                 <div class="small text-muted">{{ v.license_plate }} • {{ v.fuel_type|upper }}</div>
               </div>
               <span class="badge bg-secondary">{{ v.vehicle_type }}</span>

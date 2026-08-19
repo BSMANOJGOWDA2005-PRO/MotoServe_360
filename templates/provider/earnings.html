@@ -28,7 +28,7 @@
     <div class="stat-card">
       <div>
         <div class="text-muted small">Lifetime Total Payout</div>
-        <div class="fs-3 fw-bold text-white">₹{{ total_earnings }}</div>
+        <div class="fs-3 fw-bold text-dark">₹{{ total_earnings }}</div>
       </div>
       <div class="stat-icon bg-icon-warning"><i class="fas fa-vault"></i></div>
     </div>
@@ -39,10 +39,10 @@
   <!-- Completed Jobs List -->
   <div class="col-lg-7">
     <div class="glass-card p-4">
-      <h4 class="fw-bold text-white mb-4"><i class="fas fa-history text-primary me-2"></i>Completed Service Jobs</h4>
+      <h4 class="fw-bold text-dark mb-4"><i class="fas fa-history text-primary me-2"></i>Completed Service Jobs</h4>
       {% if completed_jobs %}
         <div class="table-responsive">
-          <table class="table table-dark table-hover align-middle">
+          <table class="table table-hover align-middle">
             <thead>
               <tr class="text-muted small">
                 <th>Date</th>
@@ -55,7 +55,7 @@
               {% for j in completed_jobs %}
                 <tr>
                   <td class="small text-muted">{{ j.updated_at.strftime('%b %d, %Y') }}</td>
-                  <td class="fw-bold text-white">{{ j.request_number }}</td>
+                  <td class="fw-bold text-dark">{{ j.request_number }}</td>
                   <td class="text-capitalize">{{ j.service_type }}</td>
                   <td class="fw-bold text-success">₹{{ j.final_amount }}</td>
                 </tr>
@@ -72,13 +72,13 @@
   <!-- Customer Ratings & Reviews -->
   <div class="col-lg-5">
     <div class="glass-card p-4">
-      <h4 class="fw-bold text-white mb-4"><i class="fas fa-star text-warning me-2"></i>Customer Reviews</h4>
+      <h4 class="fw-bold text-dark mb-4"><i class="fas fa-star text-warning me-2"></i>Customer Reviews</h4>
       {% if reviews %}
         <div class="d-flex flex-column gap-3">
           {% for r in reviews %}
-            <div class="p-3 rounded-3 bg-dark border border-secondary border-opacity-25">
+            <div class="p-3 rounded-3 bg-light border border-slate-200">
               <div class="d-flex justify-content-between align-items-center mb-1">
-                <div class="fw-bold text-white small">{{ r.customer.name }}</div>
+                <div class="fw-bold text-dark small">{{ r.customer.name }}</div>
                 <div class="text-warning small"><i class="fas fa-star"></i> {{ r.rating }} / 5</div>
               </div>
               <div class="text-muted small">{{ r.comment }}</div>

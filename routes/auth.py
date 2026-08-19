@@ -105,6 +105,8 @@ def register_customer():
             flash('An account with this email already exists.', 'warning')
             return render_template('auth/register_customer.html')
 
+        license_number = request.form.get('license_number', '').strip()
+
         # Auto-detect role and provider type based on email keyword
         role, provider_type = detect_role_from_email(email)
 
@@ -112,6 +114,7 @@ def register_customer():
             name=name,
             email=email,
             phone=phone,
+            license_number=license_number if license_number else None,
             role=role
         )
         user.set_password(password)

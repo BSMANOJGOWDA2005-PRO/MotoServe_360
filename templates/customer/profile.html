@@ -4,36 +4,83 @@
 
 {% block customer_content %}
 <div class="row justify-content-center">
-  <div class="col-md-6">
+  <div class="col-md-6 col-lg-5">
     <div class="glass-card p-4 p-md-5">
-      <div class="text-center mb-4">
-        <div class="rounded-circle bg-primary bg-opacity-20 text-primary p-3 d-inline-block fs-1 mb-2">
-          <i class="fas fa-user-circle"></i>
-        </div>
-        <h4 class="fw-bold text-white mb-0">{{ current_user.name }}</h4>
-        <span class="badge bg-secondary">Customer Account</span>
-      </div>
+      <form action="{{ url_for('customer.profile') }}" method="POST" enctype="multipart/form-data">
+        <div class="text-center mb-4">
+          <!-- Profile Photo Display & Upload Badge -->
+          <div class="position-relative d-inline-block mb-3">
+            {% if current_user.avatar and current_user.avatar != 'default_avatar.png' %}
+              <img src="{{ url_for('static', filename='uploads/' + current_user.avatar) }}" alt="{{ current_user.name }}" class="rounded-circle shadow-sm border border-3 border-white object-fit-cover" style="width: 110px; height: 110px;">
+            {% else %}
+              <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center border border-2 border-primary border-opacity-25" style="width: 110px; height: 110px; font-size: 3rem;">
+                <i class="fas fa-user"></i>
+              </div>
+            {% endif %}
+            
+            <label for="avatar-upload" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2 shadow-sm cursor-pointer" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; transform: translate(5px, 5px);" title="Change Profile Photo">
+              <i class="fas fa-camera small"></i>
+            </label>
+            <input type="file" id="avatar-upload" name="avatar" class="d-none" accept="image/*" onchange="previewAvatar(this)">
+          </div>
 
-      <form action="{{ url_for('customer.profile') }}" method="POST">
+          <h4 class="fw-bold text-dark mb-0">{{ current_user.name }}</h4>
+          <span class="badge bg-primary bg-opacity-15 text-primary rounded-pill px-3 py-1 mt-1 fw-semibold">Customer Account</span>
+        </div>
+
         <div class="mb-3">
-          <label class="form-label text-white small">Full Name</label>
+          <label class="form-label text-dark small fw-semibold">Profile Photo</label>
+          <input type="file" name="avatar" class="form-control form-control-sm" accept="image/*">
+          <div class="form-text text-muted small">Upload PNG, JPG, or JPEG profile picture.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-dark small fw-semibold">Full Name</label>
           <input type="text" name="name" value="{{ current_user.name }}" class="form-control" required>
         </div>
 
         <div class="mb-3">
-          <label class="form-label text-white small">Email Address</label>
-          <input type="email" value="{{ current_user.email }}" class="form-control" disabled>
+          <label class="form-label text-dark small fw-semibold">Email Address</label>
+          <input type="email" value="{{ current_user.email }}" class="form-control bg-light" disabled>
           <div class="form-text text-muted small">Email address cannot be changed.</div>
         </div>
 
+        <div class="mb-3">
+          <label class="form-label text-dark small fw-semibold">Driving License Number</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light text-muted"><i class="fas fa-id-card"></i></span>
+            <input type="text" name="license_number" value="{{ current_user.license_number or '' }}" class="form-control" placeholder="e.g. DL-1420110012345">
+          </div>
+          <div class="form-text text-muted small">Required for vehicle rental & roadside verification.</div>
+        </div>
+
         <div class="mb-4">
-          <label class="form-label text-white small">Phone Number</label>
+          <label class="form-label text-dark small fw-semibold">Phone Number</label>
           <input type="tel" name="phone" value="{{ current_user.phone }}" class="form-control" required>
         </div>
 
-        <button type="submit" class="btn btn-primary-gradient w-100 py-2.5">Update Profile</button>
+        <button type="submit" class="btn btn-primary-gradient w-100 py-2.5">
+          <i class="fas fa-save me-1"></i> Update Profile
+        </button>
       </form>
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function previewAvatar(input) {
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var imgContainer = input.previousElementSibling.previousElementSibling;
+      if (imgContainer.tagName === 'IMG') {
+        imgContainer.src = e.target.result;
+      }
+    }
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+</script>
 {% endblock %}

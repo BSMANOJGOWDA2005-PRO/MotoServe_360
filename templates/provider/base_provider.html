@@ -19,7 +19,7 @@
 <body>
 
   <!-- Top Navigation Bar -->
-  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
+  <nav class="navbar navbar-expand-lg navbar-light navbar-custom sticky-top">
     <div class="container-fluid px-4">
       <a class="navbar-brand me-4" href="{{ url_for('provider.dashboard') }}">
         <i class="fas fa-cubes-stacked me-2 text-warning"></i>MotoServe<span>360</span> Partner
@@ -38,10 +38,10 @@
 
         <!-- User Profile Dropdown -->
         <div class="dropdown">
-          <button class="btn btn-outline-secondary dropdown-toggle text-white border-0 bg-dark" type="button" data-bs-toggle="dropdown">
+          <button class="btn btn-white-custom dropdown-toggle" type="button" data-bs-toggle="dropdown">
             <i class="fas fa-truck-pickup me-1 text-warning"></i> {{ current_user.name }}
           </button>
-          <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm">
             <li><a class="dropdown-item" href="{{ url_for('provider.profile') }}"><i class="fas fa-id-card me-2"></i>Business Profile</a></li>
             <li><a class="dropdown-item" href="{{ url_for('provider.earnings') }}"><i class="fas fa-wallet me-2"></i>Earnings & Payouts</a></li>
             <li><hr class="dropdown-divider"></li>
