@@ -515,6 +515,16 @@ def download_invoice(type_name, item_id):
 @login_required
 def chat(request_id):
     req = ServiceRequest.query.get_or_404(request_id)
+
+    # Verify authorization (Customer, Provider assigned, or Admin)
+    is_customer = (current_user.id == req.customer_id)
+    is_provider = (req.provider_profile and req.provider_profile.user_id == current_user.id)
+    is_admin = current_user.is_admin()
+
+    if not (is_customer or is_provider or is_admin):
+        flash('Access denied. You are not a party to this service request chat.', 'danger')
+        return redirect(url_for('main.index'))
+
     if request.method == 'POST':
         msg_text = request.form.get('message')
         if msg_text:
@@ -525,6 +535,25 @@ def chat(request_id):
             )
             db.session.add(chat_msg)
             db.session.commit()
+
+            # Create notification for recipient
+            chat_url = url_for('customer.chat', request_id=req.id)
+            if is_customer and req.provider_profile:
+                create_notification(
+                    user_id=req.provider_profile.user_id,
+                    title="New Chat Message 💬",
+                    message=f"{current_user.name}: {msg_text[:50]}",
+                    link=chat_url
+                )
+            elif is_provider:
+                provider_name = req.provider_profile.business_name if req.provider_profile else current_user.name
+                create_notification(
+                    user_id=req.customer_id,
+                    title="New Message from Provider 💬",
+                    message=f"{provider_name}: {msg_text[:50]}",
+                    link=chat_url
+                )
+
             return jsonify({'status': 'success'})
 
     messages = ChatMessage.query.filter_by(request_id=req.id).order_by(ChatMessage.created_at.asc()).all()
@@ -536,7 +565,8 @@ def chat(request_id):
             'time': m.created_at.strftime('%H:%M')
         } for m in messages])
 
-    return render_template('customer/chat.html', req=req, messages=messages)
+    base_template = 'provider/base_provider.html' if current_user.is_provider() else 'customer/base_customer.html'
+    return render_template('customer/chat.html', req=req, messages=messages, base_template=base_template)
 
 @customer_bp.route('/review/submit/<int:request_id>', methods=['POST'])
 @login_required

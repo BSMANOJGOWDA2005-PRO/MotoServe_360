@@ -96,7 +96,7 @@
         {% endif %}
       {% endwith %}
 
-      {% block provider_content %}{% endblock %}
+      {% block provider_content %}{% block content %}{% endblock %}{% endblock %}
     </main>
   </div>
 

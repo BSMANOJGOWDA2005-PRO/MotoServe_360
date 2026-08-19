@@ -143,7 +143,7 @@
         {% endif %}
       {% endwith %}
 
-      {% block customer_content %}{% endblock %}
+      {% block customer_content %}{% block content %}{% endblock %}{% endblock %}
     </main>
   </div>
 
