@@ -16,8 +16,18 @@ class ServiceRequest(db.Model):
     status = db.Column(db.String(20), default='pending', nullable=False)
     
     pickup_address = db.Column(db.String(255), nullable=False)
+    locality = db.Column(db.String(100), nullable=True)
     pickup_lat = db.Column(db.Float, nullable=False)
     pickup_lng = db.Column(db.Float, nullable=False)
+    
+    # Selected Provider Snapshot (for registered or external OSM stations)
+    provider_name = db.Column(db.String(150), nullable=True)
+    provider_lat = db.Column(db.Float, nullable=True)
+    provider_lng = db.Column(db.Float, nullable=True)
+    provider_address = db.Column(db.String(255), nullable=True)
+    provider_phone = db.Column(db.String(50), nullable=True)
+    provider_source = db.Column(db.String(20), default='registered') # 'registered' or 'osm'
+    distance_km = db.Column(db.Float, nullable=True) # Straight-line distance from customer to provider
     
     drop_address = db.Column(db.String(255), nullable=True) # Used for towing
     drop_lat = db.Column(db.Float, nullable=True)
@@ -25,6 +35,7 @@ class ServiceRequest(db.Model):
     
     is_emergency = db.Column(db.Boolean, default=False)
     scheduled_at = db.Column(db.DateTime, default=datetime.utcnow)
+    service_notes = db.Column(db.Text, nullable=True)
     
     estimated_fee = db.Column(db.Float, default=0.0)
     final_amount = db.Column(db.Float, default=0.0)

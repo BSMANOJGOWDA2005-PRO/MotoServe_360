@@ -119,14 +119,26 @@
 
       <!-- SOS Emergency Button -->
       <div class="mt-auto pt-4 border-top border-secondary border-opacity-25">
-        <form action="{{ url_for('customer.sos_panic') }}" method="POST">
-          <input type="hidden" name="pickup_address" value="Current GPS Emergency Location">
-          <input type="hidden" name="pickup_lat" value="12.9716">
-          <input type="hidden" name="pickup_lng" value="77.5946">
-          <button type="submit" class="btn btn-sos w-100 d-flex align-items-center justify-content-center gap-2">
+        <form action="{{ url_for('customer.sos_panic') }}" method="POST" id="sos-panic-form">
+          <input type="hidden" name="pickup_address" id="sos-pickup-address" value="Current GPS Emergency Location">
+          <input type="hidden" name="pickup_lat" id="sos-pickup-lat" value="12.2958">
+          <input type="hidden" name="pickup_lng" id="sos-pickup-lng" value="76.6394">
+          <button type="submit" class="btn btn-sos w-100 d-flex align-items-center justify-content-center gap-2" id="btn-sos-panic">
             <i class="fas fa-triangle-exclamation fs-5"></i> SOS PANIC
           </button>
         </form>
+        <script>
+        document.addEventListener("DOMContentLoaded", function() {
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(pos) {
+              const latEl = document.getElementById('sos-pickup-lat');
+              const lngEl = document.getElementById('sos-pickup-lng');
+              if (latEl) latEl.value = pos.coords.latitude;
+              if (lngEl) lngEl.value = pos.coords.longitude;
+            }, function(){}, { timeout: 4000 });
+          }
+        });
+        </script>
       </div>
     </aside>
 

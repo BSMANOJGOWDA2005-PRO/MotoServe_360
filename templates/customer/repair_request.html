@@ -1,9 +1,10 @@
 {% extends 'customer/base_customer.html' %}
 
-{% block title %}Book Vehicle Repair - Customer Portal{% endblock %}
+{% block title %}Book Vehicle Repair - MotoServe 360{% endblock %}
 
 {% block customer_content %}
 <div class="row g-4">
+  <!-- Left Column: Booking Form -->
   <div class="col-lg-5">
     <div class="glass-card p-4">
       <div class="d-flex align-items-center gap-3 mb-4">
@@ -14,11 +15,12 @@
         </div>
       </div>
 
-      <form action="{{ url_for('customer.request_repair') }}" method="POST" enctype="multipart/form-data">
+      <form action="{{ url_for('customer.request_repair') }}" method="POST" enctype="multipart/form-data" id="repair-booking-form">
+        <!-- Vehicle Selection -->
         <div class="mb-3">
-          <label class="form-label text-dark small">Select Vehicle</label>
+          <label class="form-label text-dark small fw-semibold">Select Vehicle</label>
           <select name="vehicle_id" class="form-select">
-            <option value="">-- General Request --</option>
+            <option value="">-- General Request (No Vehicle) --</option>
             {% for v in vehicles %}
               <option value="{{ v.id }}">{{ v.make }} {{ v.model }} ({{ v.license_plate }})</option>
             {% endfor %}
@@ -26,7 +28,7 @@
         </div>
 
         <div class="mb-3">
-          <label class="form-label text-dark small">Problem Category</label>
+          <label class="form-label text-dark small fw-semibold">Problem Category</label>
           <select name="problem_category" class="form-select" required>
             <option value="Engine Breakdown">Engine Breakdown / Overheating</option>
             <option value="Flat Tyre">Flat Tyre / Puncture</option>
@@ -38,79 +40,125 @@
         </div>
 
         <div class="mb-3">
-          <label class="form-label text-dark small">Describe the Issue</label>
+          <label class="form-label text-dark small fw-semibold">Describe the Issue</label>
           <textarea name="problem_description" class="form-control" rows="3" placeholder="Describe symptoms (e.g. Strange noise from engine, car won't start)" required></textarea>
         </div>
 
         <div class="mb-3">
-          <label class="form-label text-dark small">Upload Photo of Problem / Vehicle (Optional)</label>
+          <label class="form-label text-dark small fw-semibold">Upload Photo of Problem / Vehicle (Optional)</label>
           <input type="file" name="photo" class="form-control" accept="image/*">
         </div>
 
-        <!-- Location -->
-        <div class="mb-3">
-          <label class="form-label text-dark small">Breakdown Location</label>
-          <input type="text" name="pickup_address" id="pickup_address" class="form-control" value="Indiranagar 100ft Road, Bengaluru" required>
+        <!-- Emergency Toggle -->
+        <div class="form-check form-switch mb-3 p-3 rounded-3 bg-light border border-secondary border-opacity-25">
+          <input class="form-check-input ms-0 me-3" type="checkbox" name="is_emergency" id="is_emergency">
+          <label class="form-check-label text-dark small fw-bold" for="is_emergency">
+            🚨 Urgent Breakdown on Roadside (+Priority dispatch)
+          </label>
         </div>
 
-        <input type="hidden" name="pickup_lat" id="pickup_lat" value="12.9784">
-        <input type="hidden" name="pickup_lng" id="pickup_lng" value="77.6408">
+        <!-- Selected Provider Card (Dynamic) -->
+        <div id="selected-provider-card" class="p-3 rounded-3 bg-light border border-primary border-opacity-50 mb-3 d-none">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <span class="text-primary small fw-bold d-block"><i class="fas fa-wrench me-1"></i> Selected Mechanic / Garage:</span>
+              <h6 class="fw-bold text-dark mb-1" id="selected-provider-name-text">-</h6>
+              <div class="small" id="selected-provider-meta-text"></div>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-danger" id="btn-clear-provider" title="Clear selection">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Breakdown Location -->
+        <div class="mb-3">
+          <label class="form-label text-dark small fw-semibold">Breakdown Location Address</label>
+          <input type="text" name="pickup_address" id="pickup_address" class="form-control" placeholder="Detecting your breakdown location..." required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-dark small fw-semibold">Additional Landmark / Location Notes (Optional)</label>
+          <textarea name="service_notes" class="form-control" rows="2" placeholder="e.g. Parked near traffic signal, engine smoking"></textarea>
+        </div>
+
+        <!-- Hidden Coordinates & Provider Selection Inputs -->
+        <input type="hidden" name="locality" id="locality" value="">
+        <input type="hidden" name="pickup_lat" id="pickup_lat" value="12.2958">
+        <input type="hidden" name="pickup_lng" id="pickup_lng" value="76.6394">
+        <input type="hidden" name="selected_provider_id" id="selected_provider_id" value="">
+        <input type="hidden" name="selected_provider_name" id="selected_provider_name" value="">
+        <input type="hidden" name="provider_lat" id="provider_lat" value="">
+        <input type="hidden" name="provider_lng" id="provider_lng" value="">
+        <input type="hidden" name="provider_address" id="provider_address" value="">
+        <input type="hidden" name="provider_source" id="provider_source" value="registered">
 
         <div class="p-3 rounded-3 bg-light border border-secondary border-opacity-25 mb-4">
           <div class="d-flex justify-content-between text-dark fw-bold">
             <span>Base Inspection Fee:</span>
-            <span class="text-primary">₹250.00</span>
+            <span class="text-primary fs-5">₹250.00</span>
           </div>
-          <div class="small text-muted mt-1">* Final repair costs for replaced parts will be confirmed on-site by mechanic.</div>
+          <div class="small text-muted mt-1">* Final repair costs for replaced parts will be confirmed on-site by the mechanic.</div>
         </div>
 
-        <button type="submit" class="btn btn-primary-gradient w-100 py-2.5"><i class="fas fa-paper-plane me-2"></i>Book Nearest Mechanic</button>
+        <button type="submit" class="btn btn-primary-gradient w-100 py-2.5 fw-bold" id="btn-submit-repair">
+          <i class="fas fa-paper-plane me-2"></i>Book & Dispatch Nearest Mechanic
+        </button>
       </form>
     </div>
   </div>
 
+  <!-- Right Column: Interactive Map & Nearby Mechanics -->
   <div class="col-lg-7">
     <div class="glass-card p-4">
-      <h5 class="fw-bold text-dark mb-2"><i class="fas fa-map-location-dot text-primary me-2"></i>Breakdown Location Map</h5>
-      <p class="text-muted small mb-3">Set exact spot where your vehicle is currently located.</p>
-      
-      <div id="repair-map" style="height: 380px; border-radius: 12px;"></div>
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+        <div>
+          <h5 class="fw-bold text-dark mb-0"><i class="fas fa-map-location-dot text-primary me-2"></i>Nearby Repair Providers Map</h5>
+          <span class="text-muted small" id="location-status-text">Detecting breakdown location...</span>
+        </div>
+        <!-- Radius Selector Pills -->
+        <div class="btn-group btn-group-sm" role="group">
+          <button type="button" class="btn btn-outline-secondary btn-radius-choice fw-semibold" data-radius="10">10 km</button>
+          <button type="button" class="btn btn-primary text-white btn-radius-choice fw-semibold" data-radius="15">15 km</button>
+          <button type="button" class="btn btn-outline-secondary btn-radius-choice fw-semibold" data-radius="25">25 km</button>
+        </div>
+      </div>
+      <p class="text-muted small mb-3">Set the exact spot where your vehicle is broken down. Active certified mechanics and mapped workshops will update automatically.</p>
 
-      <!-- Quick Location Controls Below Map -->
+      <div id="repair-map" style="height: 360px; border-radius: 12px;"></div>
+
+      <!-- Quick Location Controls & City Switcher -->
       <div class="location-toolbar-container mt-3 p-3 bg-light rounded-3 border">
-        <!-- Row 1: Quick Action - Current Location Button -->
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 pb-2 border-bottom">
-          <div>
-            <span class="fw-bold text-dark small d-block">
-              <i class="fas fa-location-crosshairs text-primary me-1"></i> Quick Location Methods
-            </span>
-            <span class="text-muted" style="font-size: 0.8rem;">Auto-detect GPS, search by pincode, or type address</span>
+          <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2 fw-semibold shadow-sm" id="btn-current-location">
+              <i class="fas fa-crosshairs"></i>
+              <span>Use Current Location</span>
+            </button>
           </div>
-          <button type="button" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2 fw-semibold shadow-sm" id="btn-current-location">
-            <i class="fas fa-crosshairs"></i>
-            <span>Use Current Location</span>
-          </button>
+          <div class="d-flex align-items-center gap-1">
+            <span class="small text-muted me-1">Quick Cities:</span>
+            <button type="button" class="btn btn-sm btn-outline-dark fw-semibold" id="btn-preset-mysuru">📍 Mysuru</button>
+            <button type="button" class="btn btn-sm btn-outline-dark fw-semibold" id="btn-preset-bengaluru">📍 Bengaluru</button>
+          </div>
         </div>
 
-        <!-- Row 2: Pincode & Manual Entry -->
         <div class="row g-2">
-          <!-- Pincode Search -->
           <div class="col-md-5">
             <label class="form-label small text-secondary fw-semibold mb-1" for="map-pincode-input">
               <i class="fas fa-envelopes-bulk text-warning me-1"></i> Search by Pincode
             </label>
             <div class="input-group input-group-sm">
-              <input type="text" id="map-pincode-input" class="form-control" placeholder="e.g. 560001" maxlength="10">
+              <input type="text" id="map-pincode-input" class="form-control" placeholder="e.g. 570001 or 560001" maxlength="10">
               <button class="btn btn-outline-primary fw-semibold" type="button" id="btn-pincode-search">
                 <i class="fas fa-magnifying-glass me-1"></i> Locate
               </button>
             </div>
           </div>
 
-          <!-- Manual Location Entry -->
           <div class="col-md-7">
             <label class="form-label small text-secondary fw-semibold mb-1" for="map-manual-input">
-              <i class="fas fa-pen-to-square text-success me-1"></i> Manual Location / Landmark
+              <i class="fas fa-pen-to-square text-success me-1"></i> Search Area / Landmark
             </label>
             <div class="input-group input-group-sm">
               <input type="text" id="map-manual-input" class="form-control" placeholder="Type area, landmark, street...">
@@ -121,10 +169,26 @@
           </div>
         </div>
 
-        <!-- Live Status / Feedback Alert -->
         <div id="location-feedback-alert" class="alert alert-info py-2 px-3 mt-2 mb-0 d-none align-items-center gap-2 small" role="alert">
           <i class="fas fa-circle-info flex-shrink-0" id="feedback-icon"></i>
           <span id="feedback-text"></span>
+        </div>
+      </div>
+
+      <!-- Real Nearby Repair Workshops List Panel -->
+      <div class="mt-4">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <h6 class="fw-bold text-dark mb-0"><i class="fas fa-wrench text-primary me-2"></i>Nearby Mechanics & Garages</h6>
+          <span class="badge bg-light text-muted border small"><i class="fas fa-shield-halved me-1"></i>Registered Partners Prioritized</span>
+        </div>
+        <div id="nearby-providers-list">
+          <div class="text-center py-4 text-muted">
+            <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
+            <p class="small mb-0">Searching repair providers near your location...</p>
+          </div>
+        </div>
+        <div class="small text-muted mt-2">
+          * Straight-line distances shown. Verified registered MotoServe mechanics receive real-time app dispatch.
         </div>
       </div>
     </div>
@@ -135,10 +199,23 @@
 {% block extra_js %}
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-  const map = initMap('repair-map', 12.9784, 77.6408, 14);
-  if (map) {
-    setPickupLocationPicker(map, 'pickup_lat', 'pickup_lng', 'pickup_address');
-  }
+  initServiceBookingMap({
+    mapElementId: 'repair-map',
+    serviceType: 'repair',
+    initialRadius: 15,
+    latInputId: 'pickup_lat',
+    lngInputId: 'pickup_lng',
+    addressInputId: 'pickup_address',
+    localityInputId: 'locality',
+    providerIdInputId: 'selected_provider_id',
+    providerNameInputId: 'selected_provider_name',
+    providerLatInputId: 'provider_lat',
+    providerLngInputId: 'provider_lng',
+    providerAddressInputId: 'provider_address',
+    providerSourceInputId: 'provider_source',
+    providerListContainerId: 'nearby-providers-list',
+    selectedProviderCardId: 'selected-provider-card'
+  });
 });
 </script>
 {% endblock %}

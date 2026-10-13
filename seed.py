@@ -173,6 +173,82 @@ def seed_database():
         db.session.add(p4_profile)
         db.session.flush()
 
+        # Provider 5: Mysuru Fuel Delivery Partner
+        p5_user = User(
+            name="Ramesh Gowda",
+            email="mysore_fuel@motoserve.com",
+            phone="+91 9880011223",
+            role="provider"
+        )
+        p5_user.set_password("provider123")
+        db.session.add(p5_user)
+        db.session.flush()
+
+        p5_profile = ProviderProfile(
+            user_id=p5_user.id,
+            provider_type="fuel",
+            business_name="Chamundi Express Fuel Logistics",
+            license_number="FL-44021-MYS",
+            is_online=True,
+            current_lat=12.3020,
+            current_lng=76.6450,
+            rating=4.9,
+            total_ratings=19,
+            status="approved"
+        )
+        db.session.add(p5_profile)
+
+        # Provider 6: Mysuru Mechanic Partner
+        p6_user = User(
+            name="Anand Murthy",
+            email="mysore_mechanic@motoserve.com",
+            phone="+91 9880033445",
+            role="provider"
+        )
+        p6_user.set_password("provider123")
+        db.session.add(p6_user)
+        db.session.flush()
+
+        p6_profile = ProviderProfile(
+            user_id=p6_user.id,
+            provider_type="mechanic",
+            business_name="Royal Mysore Auto Works & Garage",
+            license_number="MC-77112-MYS",
+            is_online=True,
+            current_lat=12.2980,
+            current_lng=76.6380,
+            rating=4.8,
+            total_ratings=31,
+            status="approved"
+        )
+        db.session.add(p6_profile)
+
+        # Provider 7: Mysuru Towing Partner
+        p7_user = User(
+            name="Chetan Kumar",
+            email="mysore_tow@motoserve.com",
+            phone="+91 9880055667",
+            role="provider"
+        )
+        p7_user.set_password("provider123")
+        db.session.add(p7_user)
+        db.session.flush()
+
+        p7_profile = ProviderProfile(
+            user_id=p7_user.id,
+            provider_type="tow",
+            business_name="Chamundi Rapid Towing Services",
+            license_number="TW-99334-MYS",
+            is_online=True,
+            current_lat=12.3100,
+            current_lng=76.6500,
+            rating=5.0,
+            total_ratings=14,
+            status="approved"
+        )
+        db.session.add(p7_profile)
+        db.session.flush()
+
         # 5. CREATE E-COMMERCE PRODUCTS
         products = [
             Product(

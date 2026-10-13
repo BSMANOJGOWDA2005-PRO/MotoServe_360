@@ -64,17 +64,18 @@
 
   <div class="col-lg-4">
     <!-- Provider Info Card -->
-    <div class="glass-card p-4 mb-4">
-      <h5 class="fw-bold text-white mb-3"><i class="fas fa-id-badge text-primary me-2"></i>Assigned Provider</h5>
+    <div class="glass-card p-4 mb-4" id="provider-card-wrapper">
+      <h5 class="fw-bold text-dark mb-3"><i class="fas fa-id-badge text-primary me-2"></i>Assigned Provider / Station</h5>
+      <div id="assigned-provider-box">
       {% if req.provider_profile %}
         <div class="d-flex align-items-center gap-3 mb-3">
-          <div class="rounded-circle bg-primary bg-opacity-20 p-3 text-primary fs-3">
+          <div class="rounded-circle bg-primary bg-opacity-10 p-3 text-primary fs-3">
             <i class="fas fa-user-shield"></i>
           </div>
           <div>
-            <h6 class="fw-bold text-white mb-0">{{ req.provider_profile.business_name }}</h6>
+            <h6 class="fw-bold text-dark mb-0">{{ req.provider_profile.business_name }}</h6>
             <div class="small text-warning">
-              <i class="fas fa-star"></i> {{ req.provider_profile.rating }} / 5.0 (Verified)
+              <i class="fas fa-star"></i> {{ req.provider_profile.rating }} / 5.0 (Verified Partner)
             </div>
             <div class="small text-muted">{{ req.provider_profile.user.phone }}</div>
           </div>
@@ -84,12 +85,39 @@
           <a href="tel:{{ req.provider_profile.user.phone }}" class="btn btn-outline-success"><i class="fas fa-phone me-2"></i>Call Provider</a>
           <a href="{{ url_for('customer.chat', request_id=req.id) }}" class="btn btn-outline-primary"><i class="fas fa-comments me-2"></i>In-App Chat</a>
         </div>
+      {% elif req.provider_name %}
+        <div class="d-flex align-items-start gap-3 mb-3">
+          <div class="rounded-circle {% if req.service_type == 'fuel' %}bg-warning text-dark{% elif req.service_type == 'repair' %}bg-primary text-white{% else %}bg-danger text-white{% endif %} bg-opacity-25 p-3 fs-3 d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
+            {% if req.service_type == 'fuel' %}
+              <i class="fas fa-gas-pump text-warning"></i>
+            {% elif req.service_type == 'repair' %}
+              <i class="fas fa-wrench text-primary"></i>
+            {% else %}
+              <i class="fas fa-truck-pickup text-danger"></i>
+            {% endif %}
+          </div>
+          <div>
+            <h6 class="fw-bold text-dark mb-1">{{ req.provider_name }}</h6>
+            <span class="badge bg-success-subtle text-success border border-success-subtle small mb-1">
+              <i class="fas fa-link me-1"></i>Connected Nearest {% if req.service_type == 'fuel' %}Fuel Station{% elif req.service_type == 'repair' %}Workshop{% else %}Tow Service{% endif %}
+            </span>
+            <div class="small text-muted mt-1"><i class="fas fa-location-dot me-1"></i>{{ req.provider_address or 'Nearby Station' }}</div>
+            {% if req.distance_km %}
+              <div class="small text-primary fw-semibold mt-1"><i class="fas fa-route me-1"></i>Distance: {{ "%.1f"|format(req.distance_km) }} km away</div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="alert alert-info py-2 px-3 small mb-0">
+          <i class="fas fa-satellite-dish me-1"></i>
+          Connected via real OpenStreetMap mapping. Route connected to your location on the map.
+        </div>
       {% else %}
-        <div class="text-center py-3 text-muted">
+        <div class="text-center py-3 text-muted" id="provider-searching-state">
           <i class="fas fa-spinner fa-spin fs-3 mb-2"></i>
           <p class="small mb-0">Searching nearest available provider...</p>
         </div>
       {% endif %}
+      </div>
     </div>
 
     <!-- Payment & Invoice Actions -->
