@@ -11,7 +11,8 @@ from models import (
 from services import (
     find_nearest_provider, calculate_haversine_distance, create_notification,
     generate_invoice_html, validate_coordinates, format_distance,
-    get_nearby_fuel, get_nearby_repair, get_nearby_towing
+    get_nearby_fuel, get_nearby_repair, get_nearby_towing,
+    get_system_settings
 )
 from extensions import db
 
@@ -126,11 +127,18 @@ def request_fuel():
         is_emergency = True if request.form.get('is_emergency') else False
         service_notes = request.form.get('service_notes', '').strip()
 
-        # Cost calculation
-        fuel_prices = {'petrol': 102.50, 'diesel': 89.20, 'cng': 78.00}
+        # Cost calculation based on system configurations
+        settings = get_system_settings()
+        fuel_prices = {
+            'petrol': settings.get('petrol_price', 102.50),
+            'diesel': settings.get('diesel_price', 89.20),
+            'cng': settings.get('cng_price', 78.00)
+        }
         price_per_l = fuel_prices.get(fuel_type.lower(), 100.0)
         fuel_cost = round(quantity * price_per_l, 2)
-        delivery_fee = 75.00 if is_emergency else 50.00
+        base_delivery = settings.get('delivery_fee', 50.00)
+        surge = settings.get('emergency_surge', 25.00) if is_emergency else 0.00
+        delivery_fee = round(base_delivery + surge, 2)
         total_estimated = round(fuel_cost + delivery_fee, 2)
 
         # 3. Provider Resolution: Registered partner vs External OSM station
@@ -370,8 +378,8 @@ def request_repair():
             distance_km=dist_km,
             service_notes=service_notes,
             is_emergency=is_emergency,
-            estimated_fee=250.00,
-            final_amount=250.00
+            estimated_fee=get_system_settings().get('mechanic_inspection_fee', 250.00),
+            final_amount=get_system_settings().get('mechanic_inspection_fee', 250.00)
         )
         db.session.add(service_req)
         db.session.flush()
@@ -452,8 +460,9 @@ def request_tow():
         else:
             tow_dist_km = 5.0
 
-        base_charge = 300.00
-        rate_per_km = 35.00
+        settings = get_system_settings()
+        base_charge = settings.get('towing_base_fee', 300.00)
+        rate_per_km = settings.get('towing_rate_per_km', 35.00)
         total_fee = round(base_charge + (tow_dist_km * rate_per_km), 2)
 
         # Provider resolution

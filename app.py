@@ -38,6 +38,7 @@ def create_app(config_class=Config):
         return User.query.get(int(user_id))
 
     # Global Context Processor
+    from services import get_system_settings
     @app.context_processor
     def inject_global_vars():
         unread_notifications_count = 0
@@ -53,7 +54,8 @@ def create_app(config_class=Config):
 
         return dict(
             unread_notifications_count=unread_notifications_count,
-            cart_items_count=cart_items_count
+            cart_items_count=cart_items_count,
+            system_settings=get_system_settings()
         )
 
     # Error Handlers

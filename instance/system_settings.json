@@ -1,0 +1,11 @@
+{
+  "platform_name": "MotoServe 360",
+  "petrol_price": 102.5,
+  "diesel_price": 89.2,
+  "cng_price": 78.0,
+  "delivery_fee": 50.0,
+  "emergency_surge": 25.0,
+  "towing_rate_per_km": 35.0,
+  "towing_base_fee": 300.0,
+  "mechanic_inspection_fee": 250.0
+}

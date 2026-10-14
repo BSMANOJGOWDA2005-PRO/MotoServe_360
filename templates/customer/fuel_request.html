@@ -31,9 +31,9 @@
           <div class="col-6">
             <label class="form-label text-dark small fw-semibold">Fuel Type</label>
             <select name="fuel_type" id="fuel_type" class="form-select" onchange="calculateFuelEstimate()">
-              <option value="petrol">Petrol (₹102.50/L)</option>
-              <option value="diesel">Diesel (₹89.20/L)</option>
-              <option value="cng">CNG (₹78.00/kg)</option>
+              <option value="petrol">Petrol (₹{{ "%.2f"|format(system_settings.petrol_price) }}/L)</option>
+              <option value="diesel">Diesel (₹{{ "%.2f"|format(system_settings.diesel_price) }}/L)</option>
+              <option value="cng">CNG (₹{{ "%.2f"|format(system_settings.cng_price) }}/kg)</option>
             </select>
           </div>
           <div class="col-6">
@@ -46,7 +46,7 @@
         <div class="form-check form-switch mb-3 p-3 rounded-3 bg-light border border-secondary border-opacity-25">
           <input class="form-check-input ms-0 me-3" type="checkbox" name="is_emergency" id="is_emergency" onchange="calculateFuelEstimate()">
           <label class="form-check-label text-dark small fw-bold" for="is_emergency">
-            🚨 Urgent Emergency Request (+₹25 priority fee)
+            🚨 Urgent Emergency Request (+₹{{ "%.0f"|format(system_settings.emergency_surge) }} priority fee)
           </label>
         </div>
 
@@ -90,16 +90,16 @@
         <div class="p-3 rounded-3 bg-light border border-secondary border-opacity-25 mb-4">
           <div class="d-flex justify-content-between small text-muted mb-1">
             <span>Fuel Charges:</span>
-            <span id="fuel-subtotal" class="fw-semibold text-dark">₹512.50</span>
+            <span id="fuel-subtotal" class="fw-semibold text-dark">₹{{ "%.2f"|format(5 * system_settings.petrol_price) }}</span>
           </div>
           <div class="d-flex justify-content-between small text-muted mb-2">
             <span>Delivery Fee:</span>
-            <span id="delivery-fee" class="fw-semibold text-dark">₹50.00</span>
+            <span id="delivery-fee" class="fw-semibold text-dark">₹{{ "%.2f"|format(system_settings.delivery_fee) }}</span>
           </div>
           <hr class="border-secondary my-2">
           <div class="d-flex justify-content-between fw-bold text-dark fs-5">
             <span>Total Amount:</span>
-            <span class="text-warning" id="total-amount">₹562.50</span>
+            <span class="text-warning" id="total-amount">₹{{ "%.2f"|format(5 * system_settings.petrol_price + system_settings.delivery_fee) }}</span>
           </div>
         </div>
 
@@ -203,14 +203,21 @@
 {% block extra_js %}
 <script>
 function calculateFuelEstimate() {
-  const fuelPrices = { petrol: 102.50, diesel: 89.20, cng: 78.00 };
+  const fuelPrices = {
+    petrol: {{ system_settings.petrol_price }},
+    diesel: {{ system_settings.diesel_price }},
+    cng: {{ system_settings.cng_price }}
+  };
+  const baseDeliveryFee = {{ system_settings.delivery_fee }};
+  const emergencySurge = {{ system_settings.emergency_surge }};
+
   const type = document.getElementById('fuel_type').value;
   const qty = parseFloat(document.getElementById('fuel_qty').value) || 0;
   const isEmergency = document.getElementById('is_emergency').checked;
 
   const pricePerL = fuelPrices[type] || 100.0;
   const fuelSubtotal = qty * pricePerL;
-  const deliveryFee = isEmergency ? 75.00 : 50.00;
+  const deliveryFee = baseDeliveryFee + (isEmergency ? emergencySurge : 0.0);
   const total = fuelSubtotal + deliveryFee;
 
   document.getElementById('fuel-subtotal').innerText = '₹' + fuelSubtotal.toFixed(2);

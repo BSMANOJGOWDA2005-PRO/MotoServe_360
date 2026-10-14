@@ -43,7 +43,7 @@
       <div class="col-sm-6 col-md-4 col-xl-3">
         <div class="glass-card product-card p-3 h-100">
           <div class="position-relative">
-            <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-img w-100 mb-3 rounded-3">
+            <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-img w-100 mb-3 rounded-3" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1486006920555-c77dce18193b?w=500&q=80';">
             {% if product.discount_percentage > 0 %}
               <span class="position-absolute top-0 start-0 m-2 badge bg-danger fs-6">-{{ product.discount_percentage|int }}% OFF</span>
             {% endif %}

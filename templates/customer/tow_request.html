@@ -86,16 +86,16 @@
         <div class="p-3 rounded-3 bg-light border border-secondary border-opacity-25 mb-4">
           <div class="d-flex justify-content-between small text-muted mb-1">
             <span>Base Hookup & Tow Charge:</span>
-            <span class="text-dark fw-semibold">₹300.00</span>
+            <span class="text-dark fw-semibold">₹{{ "%.2f"|format(system_settings.towing_base_fee) }}</span>
           </div>
           <div class="d-flex justify-content-between small text-muted mb-2">
-            <span>Estimated Distance Charge:</span>
-            <span class="text-dark fw-semibold" id="tow-distance-charge">₹175.00</span>
+            <span>Estimated Distance Charge (5 km @ ₹{{ "%.2f"|format(system_settings.towing_rate_per_km) }}/km):</span>
+            <span class="text-dark fw-semibold" id="tow-distance-charge">₹{{ "%.2f"|format(5 * system_settings.towing_rate_per_km) }}</span>
           </div>
           <hr class="border-secondary my-2">
           <div class="d-flex justify-content-between fw-bold text-dark fs-5">
             <span>Estimated Total:</span>
-            <span class="text-danger" id="tow-total-fee">₹475.00</span>
+            <span class="text-danger" id="tow-total-fee">₹{{ "%.2f"|format(system_settings.towing_base_fee + 5 * system_settings.towing_rate_per_km) }}</span>
           </div>
           <div class="small text-muted mt-1">* Final charges calculated based on precise vehicle transit distance.</div>
         </div>

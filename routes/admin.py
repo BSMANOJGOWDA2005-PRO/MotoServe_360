@@ -3,12 +3,13 @@ import shutil
 from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify, send_file, current_app
 from flask_login import login_required, current_user
 from datetime import datetime, timedelta
+from werkzeug.utils import secure_filename
 
 from models import (
     User, ProviderProfile, ServiceRequest, FuelDetails, RepairDetails, TowDetails,
     Product, Order, OrderItem, Payment, Review, Notification, ChatMessage, AdminLog, CartItem, Vehicle
 )
-from services import create_notification
+from services import create_notification, get_system_settings, save_system_settings
 from extensions import db
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -266,6 +267,22 @@ def update_order_status(order_id):
     return redirect(url_for('admin.orders'))
 
 
+ALLOWED_PRODUCT_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp', 'gif'}
+
+def allowed_product_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_PRODUCT_EXTENSIONS
+
+DEFAULT_PRODUCT_IMAGES = {
+    'Engine Oil': 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=500&q=80',
+    'Battery': 'https://images.unsplash.com/photo-1620021650390-349c25608d0e?w=500&q=80',
+    'Tyres': 'https://images.unsplash.com/photo-1578844251758-2f71da64c96f?w=500&q=80',
+    'Helmet': 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=500&q=80',
+    'Accessories': 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=500&q=80',
+    'Brake Pads': 'https://images.unsplash.com/photo-1600706432520-72ce6f809d43?w=500&q=80',
+    'Lubricants': 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=500&q=80',
+    'Cleaning Kit': 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=500&q=80',
+}
+
 # --- PRODUCT STORE & INVENTORY MANAGEMENT ---
 @admin_bp.route('/products', methods=['GET', 'POST'])
 @login_required
@@ -279,13 +296,29 @@ def products():
         description = request.form.get('description')
         discount = float(request.form.get('discount_percentage', 0))
 
+        image_url = None
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and file.filename != '' and allowed_product_file(file.filename):
+                filename = secure_filename(file.filename)
+                unique_filename = f"prod_{int(datetime.utcnow().timestamp())}_{filename}"
+                file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename))
+                image_url = url_for('static', filename=f'uploads/{unique_filename}')
+
+        if not image_url and request.form.get('image_url'):
+            image_url = request.form.get('image_url').strip()
+
+        if not image_url:
+            image_url = DEFAULT_PRODUCT_IMAGES.get(category, 'https://images.unsplash.com/photo-1486006920555-c77dce18193b?w=500&q=80')
+
         product = Product(
             name=name,
             category=category,
             price=price,
             stock=stock,
             description=description,
-            discount_percentage=discount
+            discount_percentage=discount,
+            image_url=image_url
         )
         db.session.add(product)
         db.session.commit()
@@ -308,6 +341,24 @@ def edit_product(product_id):
     product.stock = int(request.form.get('stock', 0))
     product.discount_percentage = float(request.form.get('discount_percentage', 0))
     product.description = request.form.get('description')
+
+    if 'image' in request.files:
+        file = request.files['image']
+        if file and file.filename != '' and allowed_product_file(file.filename):
+            filename = secure_filename(file.filename)
+            unique_filename = f"prod_{product.id}_{int(datetime.utcnow().timestamp())}_{filename}"
+            file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename))
+            product.image_url = url_for('static', filename=f'uploads/{unique_filename}')
+    
+    # Check if a custom image_url was specified without a new file upload
+    if request.form.get('image_url') and not ('image' in request.files and request.files['image'].filename != ''):
+        image_url_val = request.form.get('image_url').strip()
+        if image_url_val:
+            product.image_url = image_url_val
+
+    if 'is_active' in request.form:
+        product.is_active = (request.form.get('is_active') == '1')
+
     db.session.commit()
     log_admin_action("Edit Product", f"Edited product ID {product.id}: {product.name}")
     flash(f'Product {product.name} updated.', 'success')
@@ -318,10 +369,19 @@ def edit_product(product_id):
 @admin_required
 def delete_product(product_id):
     product = Product.query.get_or_404(product_id)
-    product.is_active = False # Soft delete
-    db.session.commit()
-    log_admin_action("Delete Product", f"Deactivated product ID {product.id}: {product.name}")
-    flash(f'Product {product.name} deleted.', 'info')
+    product_name = product.name
+    try:
+        # Delete associated cart and order items
+        CartItem.query.filter_by(product_id=product.id).delete()
+        OrderItem.query.filter_by(product_id=product.id).delete()
+        
+        db.session.delete(product)
+        db.session.commit()
+        log_admin_action("Delete Product", f"Deleted product ID {product_id}: {product_name}")
+        flash(f'Product {product_name} deleted successfully.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Failed to delete product {product_name}: {str(e)}', 'danger')
     return redirect(url_for('admin.products'))
 
 
@@ -358,6 +418,13 @@ def backup_db():
 @admin_required
 def settings():
     if request.method == 'POST':
-        flash('System settings updated successfully.', 'success')
+        try:
+            save_system_settings(request.form)
+            log_admin_action("Update System Settings", "Updated platform rates and configurations")
+            flash('System settings updated successfully! New rates are now active for user bookings.', 'success')
+        except Exception as e:
+            flash(f'Error updating settings: {str(e)}', 'danger')
         return redirect(url_for('admin.settings'))
-    return render_template('admin/settings.html')
+    
+    current_settings = get_system_settings()
+    return render_template('admin/settings.html', settings=current_settings)

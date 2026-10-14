@@ -34,7 +34,7 @@
             <tr>
               <td>
                 <div class="d-flex align-items-center gap-2">
-                  <img src="{{ p.image_url }}" alt="{{ p.name }}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px;">
+                  <img src="{{ p.image_url }}" alt="{{ p.name }}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px;" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1486006920555-c77dce18193b?w=200&q=80';">
                   <span class="fw-bold text-dark small">{{ p.name }}</span>
                 </div>
               </td>
@@ -61,8 +61,8 @@
               <td>
                 <div class="d-flex gap-2">
                   <button class="btn btn-sm btn-white-custom" data-bs-toggle="modal" data-bs-target="#editProductModal{{ p.id }}"><i class="fas fa-edit text-primary"></i></button>
-                  <form action="{{ url_for('admin.delete_product', product_id=p.id) }}" method="POST" onsubmit="return confirm('Deactivate product?');">
-                    <button type="submit" class="btn btn-sm btn-white-custom"><i class="fas fa-trash text-danger"></i></button>
+                  <form action="{{ url_for('admin.delete_product', product_id=p.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to permanently delete this product?');">
+                    <button type="submit" class="btn btn-sm btn-white-custom" title="Delete Product"><i class="fas fa-trash text-danger"></i></button>
                   </form>
                 </div>
               </td>
@@ -76,7 +76,7 @@
                     <h5 class="modal-title fw-bold">Edit Product: {{ p.name }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                   </div>
-                  <form action="{{ url_for('admin.edit_product', product_id=p.id) }}" method="POST">
+                  <form action="{{ url_for('admin.edit_product', product_id=p.id) }}" method="POST" enctype="multipart/form-data">
                     <div class="modal-body">
                       <div class="mb-3">
                         <label class="form-label small">Product Name</label>
@@ -105,6 +105,25 @@
                           <label class="form-label small">Discount (%)</label>
                           <input type="number" step="0.1" name="discount_percentage" value="{{ p.discount_percentage }}" class="form-control">
                         </div>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label small fw-bold">Catalog Status</label>
+                        <select name="is_active" class="form-select">
+                          <option value="1" {% if p.is_active %}selected{% endif %}>Active (Visible in Customer Store)</option>
+                          <option value="0" {% if not p.is_active %}selected{% endif %}>Inactive (Hidden from Customer Store)</option>
+                        </select>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label small fw-bold"><i class="fas fa-camera text-success me-1"></i>Product Photo</label>
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                          <img id="editProductImagePreview{{ p.id }}" src="{{ p.image_url }}" alt="{{ p.name }}" style="width: 65px; height: 65px; object-fit: cover; border-radius: 8px; border: 1px solid #ced4da;" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1486006920555-c77dce18193b?w=200&q=80';">
+                          <div class="flex-grow-1">
+                            <label class="form-label small text-muted mb-1">Upload New Photo</label>
+                            <input type="file" name="image" class="form-control form-control-sm" accept="image/*" onchange="previewProductImage(this, 'editProductImagePreview{{ p.id }}')">
+                          </div>
+                        </div>
+                        <label class="form-label small text-muted mb-1"><i class="fas fa-link me-1"></i>Or Image URL</label>
+                        <input type="url" name="image_url" value="{{ p.image_url }}" class="form-control form-control-sm" placeholder="https://...">
                       </div>
                       <div class="mb-3">
                         <label class="form-label small">Description</label>
@@ -136,7 +155,7 @@
         <h5 class="modal-title fw-bold">Add New Auto Product</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form action="{{ url_for('admin.products') }}" method="POST">
+      <form action="{{ url_for('admin.products') }}" method="POST" enctype="multipart/form-data">
         <div class="modal-body">
           <div class="mb-3">
             <label class="form-label small">Product Name</label>
@@ -167,6 +186,18 @@
             </div>
           </div>
           <div class="mb-3">
+            <label class="form-label small fw-bold"><i class="fas fa-camera text-success me-1"></i>Product Photo</label>
+            <input type="file" name="image" class="form-control" accept="image/*" id="addProductImageInput" onchange="previewProductImage(this, 'addProductImagePreview', 'addProductImagePreviewContainer')">
+            <div class="form-text small text-muted">Upload an image file (PNG, JPG, JPEG, WEBP).</div>
+            <div class="mt-2 d-none" id="addProductImagePreviewContainer">
+              <img id="addProductImagePreview" src="" alt="Product Preview" style="width: 75px; height: 75px; object-fit: cover; border-radius: 8px; border: 1px solid #ced4da;">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small text-muted"><i class="fas fa-link me-1"></i>Or Image URL (Optional)</label>
+            <input type="url" name="image_url" class="form-control form-control-sm" placeholder="https://example.com/item-photo.jpg">
+          </div>
+          <div class="mb-3">
             <label class="form-label small">Product Description</label>
             <textarea name="description" class="form-control" rows="3" placeholder="Enter product specifications..." required></textarea>
           </div>
@@ -179,4 +210,27 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function previewProductImage(input, previewId, containerId) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const preview = document.getElementById(previewId);
+      if (preview) {
+        preview.src = e.target.result;
+      }
+      if (containerId) {
+        const container = document.getElementById(containerId);
+        if (container) {
+          container.classList.remove('d-none');
+        }
+      }
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+</script>
 {% endblock %}
