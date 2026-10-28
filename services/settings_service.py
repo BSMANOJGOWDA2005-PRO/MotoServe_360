@@ -11,6 +11,7 @@ DEFAULT_SETTINGS = {
     'cng_price': 78.00,
     'delivery_fee': 50.00,
     'emergency_surge': 25.00,
+    'platform_fee': 9.00,
     'towing_rate_per_km': 35.00,
     'towing_base_fee': 300.00,
     'mechanic_inspection_fee': 250.00
@@ -45,7 +46,7 @@ def save_system_settings(form_dict):
     
     numeric_keys = [
         'petrol_price', 'diesel_price', 'cng_price',
-        'delivery_fee', 'emergency_surge',
+        'delivery_fee', 'emergency_surge', 'platform_fee',
         'towing_rate_per_km', 'towing_base_fee', 'mechanic_inspection_fee'
     ]
     for key in numeric_keys:

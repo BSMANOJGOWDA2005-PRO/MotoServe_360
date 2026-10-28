@@ -139,7 +139,8 @@ def request_fuel():
         base_delivery = settings.get('delivery_fee', 50.00)
         surge = settings.get('emergency_surge', 25.00) if is_emergency else 0.00
         delivery_fee = round(base_delivery + surge, 2)
-        total_estimated = round(fuel_cost + delivery_fee, 2)
+        platform_fee = settings.get('platform_fee', 9.00)
+        total_estimated = round(fuel_cost + delivery_fee + platform_fee, 2)
 
         # 3. Provider Resolution: Registered partner vs External OSM station
         sel_provider_id = request.form.get('selected_provider_id')
@@ -378,8 +379,8 @@ def request_repair():
             distance_km=dist_km,
             service_notes=service_notes,
             is_emergency=is_emergency,
-            estimated_fee=get_system_settings().get('mechanic_inspection_fee', 250.00),
-            final_amount=get_system_settings().get('mechanic_inspection_fee', 250.00)
+            estimated_fee=round(get_system_settings().get('mechanic_inspection_fee', 250.00) + get_system_settings().get('platform_fee', 9.00), 2),
+            final_amount=round(get_system_settings().get('mechanic_inspection_fee', 250.00) + get_system_settings().get('platform_fee', 9.00), 2)
         )
         db.session.add(service_req)
         db.session.flush()
@@ -463,7 +464,8 @@ def request_tow():
         settings = get_system_settings()
         base_charge = settings.get('towing_base_fee', 300.00)
         rate_per_km = settings.get('towing_rate_per_km', 35.00)
-        total_fee = round(base_charge + (tow_dist_km * rate_per_km), 2)
+        platform_fee = settings.get('platform_fee', 9.00)
+        total_fee = round(base_charge + (tow_dist_km * rate_per_km) + platform_fee, 2)
 
         # Provider resolution
         sel_provider_id = request.form.get('selected_provider_id')

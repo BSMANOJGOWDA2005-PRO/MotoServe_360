@@ -94,9 +94,18 @@
         <input type="hidden" name="provider_source" id="provider_source" value="registered">
 
         <div class="p-3 rounded-3 bg-light border border-secondary border-opacity-25 mb-4">
-          <div class="d-flex justify-content-between text-dark fw-bold">
+          <div class="d-flex justify-content-between small text-muted mb-1">
             <span>Base Inspection Fee:</span>
-            <span class="text-primary fs-5">₹{{ "%.2f"|format(system_settings.mechanic_inspection_fee) }}</span>
+            <span class="fw-semibold text-dark">₹{{ "%.2f"|format(system_settings.mechanic_inspection_fee) }}</span>
+          </div>
+          <div class="d-flex justify-content-between small text-muted mb-2">
+            <span>Platform Fee:</span>
+            <span class="fw-semibold text-dark">₹{{ "%.2f"|format(system_settings.platform_fee|default(9.00)) }}</span>
+          </div>
+          <hr class="border-secondary my-2">
+          <div class="d-flex justify-content-between text-dark fw-bold fs-5">
+            <span>Total Payable:</span>
+            <span class="text-primary">₹{{ "%.2f"|format(system_settings.mechanic_inspection_fee + system_settings.platform_fee|default(9.00)) }}</span>
           </div>
           <div class="small text-muted mt-1">* Final repair costs for replaced parts will be confirmed on-site by the mechanic.</div>
         </div>

@@ -51,20 +51,27 @@
           </div>
         </div>
 
-        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="fas fa-truck-fast text-success me-2"></i>Delivery & Surge Fees</h6>
+        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="fas fa-truck-fast text-success me-2"></i>Delivery, Surge & Platform Fees</h6>
         <div class="row g-3 mb-4">
-          <div class="col-md-6">
+          <div class="col-md-4">
             <label class="form-label text-dark fw-semibold small">Standard Delivery Fee (₹)</label>
             <div class="input-group">
               <span class="input-group-text">₹</span>
               <input type="number" step="1" min="0" name="delivery_fee" value="{{ settings.delivery_fee }}" class="form-control" required>
             </div>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-4">
             <label class="form-label text-dark fw-semibold small">Emergency Priority Surge (₹)</label>
             <div class="input-group">
               <span class="input-group-text">₹</span>
               <input type="number" step="1" min="0" name="emergency_surge" value="{{ settings.emergency_surge }}" class="form-control" required>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-dark fw-semibold small">Booking Platform Fee (₹)</label>
+            <div class="input-group">
+              <span class="input-group-text">₹</span>
+              <input type="number" step="1" min="0" name="platform_fee" value="{{ settings.platform_fee }}" class="form-control" required>
             </div>
           </div>
         </div>

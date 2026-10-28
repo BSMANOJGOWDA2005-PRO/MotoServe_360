@@ -92,14 +92,18 @@
             <span>Fuel Charges:</span>
             <span id="fuel-subtotal" class="fw-semibold text-dark">₹{{ "%.2f"|format(5 * system_settings.petrol_price) }}</span>
           </div>
-          <div class="d-flex justify-content-between small text-muted mb-2">
+          <div class="d-flex justify-content-between small text-muted mb-1">
             <span>Delivery Fee:</span>
             <span id="delivery-fee" class="fw-semibold text-dark">₹{{ "%.2f"|format(system_settings.delivery_fee) }}</span>
+          </div>
+          <div class="d-flex justify-content-between small text-muted mb-2">
+            <span>Platform Fee:</span>
+            <span id="platform-fee" class="fw-semibold text-dark">₹{{ "%.2f"|format(system_settings.platform_fee|default(9.00)) }}</span>
           </div>
           <hr class="border-secondary my-2">
           <div class="d-flex justify-content-between fw-bold text-dark fs-5">
             <span>Total Amount:</span>
-            <span class="text-warning" id="total-amount">₹{{ "%.2f"|format(5 * system_settings.petrol_price + system_settings.delivery_fee) }}</span>
+            <span class="text-warning" id="total-amount">₹{{ "%.2f"|format(5 * system_settings.petrol_price + system_settings.delivery_fee + system_settings.platform_fee|default(9.00)) }}</span>
           </div>
         </div>
 
@@ -210,6 +214,7 @@ function calculateFuelEstimate() {
   };
   const baseDeliveryFee = {{ system_settings.delivery_fee }};
   const emergencySurge = {{ system_settings.emergency_surge }};
+  const platformFee = {{ system_settings.platform_fee|default(9.00) }};
 
   const type = document.getElementById('fuel_type').value;
   const qty = parseFloat(document.getElementById('fuel_qty').value) || 0;
@@ -218,10 +223,14 @@ function calculateFuelEstimate() {
   const pricePerL = fuelPrices[type] || 100.0;
   const fuelSubtotal = qty * pricePerL;
   const deliveryFee = baseDeliveryFee + (isEmergency ? emergencySurge : 0.0);
-  const total = fuelSubtotal + deliveryFee;
+  const total = fuelSubtotal + deliveryFee + platformFee;
 
   document.getElementById('fuel-subtotal').innerText = '₹' + fuelSubtotal.toFixed(2);
   document.getElementById('delivery-fee').innerText = '₹' + deliveryFee.toFixed(2);
+  const platElem = document.getElementById('platform-fee');
+  if (platElem) {
+    platElem.innerText = '₹' + platformFee.toFixed(2);
+  }
   document.getElementById('total-amount').innerText = '₹' + total.toFixed(2);
 }
 
