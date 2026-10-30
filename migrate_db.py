@@ -33,7 +33,8 @@ def migrate_database(db_path=None):
             ("provider_phone", "VARCHAR(50)"),
             ("provider_source", "VARCHAR(20) DEFAULT 'registered'"),
             ("distance_km", "FLOAT"),
-            ("service_notes", "TEXT")
+            ("service_notes", "TEXT"),
+            ("platform_fee", "FLOAT DEFAULT 9.0")
         ]
 
         added = 0

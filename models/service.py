@@ -39,7 +39,17 @@ class ServiceRequest(db.Model):
     
     estimated_fee = db.Column(db.Float, default=0.0)
     final_amount = db.Column(db.Float, default=0.0)
+    platform_fee = db.Column(db.Float, default=9.0) # Admin platform fee per booking
     payment_status = db.Column(db.String(20), default='unpaid') # 'unpaid', 'paid'
+    
+    @property
+    def effective_platform_fee(self):
+        return self.platform_fee if self.platform_fee is not None else 9.0
+
+    @property
+    def provider_payout(self):
+        """Fuel charge + delivery/service fees go to service provider; platform fee goes to admin."""
+        return max(0.0, round((self.final_amount or 0.0) - self.effective_platform_fee, 2))
     
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

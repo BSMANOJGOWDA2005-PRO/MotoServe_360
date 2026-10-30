@@ -229,16 +229,18 @@ function initServiceBookingMap(options) {
         ? `<span class="badge bg-success small me-1"><i class="fas fa-shield-check me-1"></i>Verified Partner</span>`
         : `<span class="badge bg-secondary small me-1"><i class="fas fa-map-pin me-1"></i>OpenStreetMap Verified</span>`;
 
+      const brandBadge = p.brand ? `<span class="badge bg-warning-subtle text-dark border small me-1"><i class="fas fa-gas-pump text-warning me-1"></i>${escapeHtml(p.brand)}</span>` : '';
       const distBadge = `<span class="badge bg-primary text-white small">${p.formatted_distance || (p.distance_km + ' km')}</span>`;
 
       const popupContent = `
-        <div style="min-width: 200px; font-family: inherit;">
-          <h6 class="fw-bold text-dark mb-1">${p.business_name || p.name}</h6>
-          <div class="mb-2">${partnerBadge} ${distBadge}</div>
-          <p class="small text-muted mb-2"><i class="fas fa-location-dot me-1"></i>${p.address || 'Address on record'}</p>
+        <div style="min-width: 220px; font-family: inherit;">
+          <h6 class="fw-bold text-dark mb-1">${escapeHtml(p.business_name || p.name)}</h6>
+          <div class="mb-2 d-flex flex-wrap gap-1 align-items-center">${partnerBadge} ${brandBadge} ${distBadge}</div>
+          <p class="small text-muted mb-1"><i class="fas fa-location-dot me-1"></i>${escapeHtml(p.address || 'Address on record')}</p>
+          ${p.opening_hours ? `<div class="small text-muted mb-2"><i class="fas fa-clock me-1"></i>${escapeHtml(p.opening_hours)}</div>` : ''}
           <div class="small text-secondary mb-2">Straight-line distance: <strong>${p.formatted_distance}</strong></div>
           <button type="button" class="btn btn-sm btn-primary w-100 fw-bold py-1 select-provider-btn" data-pid="${p.id}" data-pname="${escapeHtml(p.business_name || p.name)}">
-            <i class="fas fa-circle-check me-1"></i>Select This Provider
+            <i class="fas fa-circle-check me-1"></i>Select This ${serviceType === 'fuel' ? 'Station' : 'Provider'}
           </button>
         </div>
       `;
@@ -256,6 +258,16 @@ function initServiceBookingMap(options) {
 
       p._marker = marker;
     });
+
+    if (providers.length > 0) {
+      try {
+        const bounds = L.latLngBounds([[activeLat, activeLng]]);
+        providers.forEach(p => bounds.extend([p.lat, p.lng]));
+        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+      } catch (e) {
+        console.warn("Could not fit bounds:", e);
+      }
+    }
   }
 
   // Render Provider List in DOM
@@ -265,7 +277,7 @@ function initServiceBookingMap(options) {
     let html = `
       <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
         <span class="small fw-bold text-dark">
-          <i class="fas fa-list-check text-primary me-1"></i> ${providers.length} Nearby Provider(s) (${radiusKm} km radius)
+          <i class="fas fa-list-check text-primary me-1"></i> ${providers.length} Nearby ${serviceType === 'fuel' ? 'Fuel Station(s)' : 'Provider(s)'} (${radiusKm} km radius)
         </span>
         <span class="badge bg-light text-secondary border small">Sorted by Proximity</span>
       </div>
@@ -278,12 +290,14 @@ function initServiceBookingMap(options) {
         ? `<span class="badge bg-success-subtle text-success border border-success-subtle small"><i class="fas fa-certificate me-1"></i>Verified Partner</span>`
         : `<span class="badge bg-light text-secondary border small"><i class="fas fa-map-pin me-1"></i>OSM Mapped</span>`;
 
+      const brandBadge = p.brand ? `<span class="badge bg-warning-subtle text-dark border small"><i class="fas fa-gas-pump text-warning me-1"></i>${escapeHtml(p.brand)}</span>` : '';
+
       html += `
         <div class="provider-item-card p-3 rounded-3 border bg-white shadow-sm transition-all" id="provider-card-${p.id}" style="cursor: pointer;">
           <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
             <div>
               <h6 class="fw-bold text-dark mb-0">${escapeHtml(p.business_name || p.name)}</h6>
-              <div class="mt-1">${partnerBadge}</div>
+              <div class="mt-1 d-flex flex-wrap gap-1 align-items-center">${partnerBadge} ${brandBadge}</div>
             </div>
             <div class="text-end">
               <span class="badge bg-primary text-white fw-bold px-2 py-1">${p.formatted_distance}</span>
@@ -389,7 +403,8 @@ function initServiceBookingMap(options) {
     }
     if (selectedProviderMetaText) {
       const typeLabel = isPartner ? 'Verified MotoServe Partner' : 'OpenStreetMap Verified Station';
-      selectedProviderMetaText.innerHTML = `<span class="badge ${isPartner ? 'bg-success' : 'bg-secondary'} me-1">${typeLabel}</span> Straight-line: <strong>${p.formatted_distance}</strong>`;
+      const brandBadge = p.brand ? `<span class="badge bg-warning-subtle text-dark border me-1"><i class="fas fa-gas-pump text-warning me-1"></i>${escapeHtml(p.brand)}</span>` : '';
+      selectedProviderMetaText.innerHTML = `${brandBadge}<span class="badge ${isPartner ? 'bg-success' : 'bg-secondary'} me-1">${typeLabel}</span> Straight-line: <strong>${p.formatted_distance}</strong>`;
     }
   }
 

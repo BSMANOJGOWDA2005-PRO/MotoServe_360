@@ -42,7 +42,10 @@
                 {% endif %}
               </td>
               <td class="small text-truncate" style="max-width: 180px;">{{ r.pickup_address }}</td>
-              <td class="fw-bold text-success">₹{{ r.final_amount }}</td>
+              <td>
+                <div class="fw-bold text-dark">₹{{ r.final_amount }}</div>
+                <div class="small text-muted" style="font-size: 0.75rem;">Platform: <span class="text-primary fw-semibold">₹{{ r.effective_platform_fee }}</span> • Payout: <span class="text-success fw-semibold">₹{{ r.provider_payout }}</span></div>
+              </td>
               <td><span class="badge badge-status badge-{{ r.status }}">{{ r.status }}</span></td>
             </tr>
           {% endfor %}

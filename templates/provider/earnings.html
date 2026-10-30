@@ -57,7 +57,7 @@
                   <td class="small text-muted">{{ j.updated_at.strftime('%b %d, %Y') }}</td>
                   <td class="fw-bold text-dark">{{ j.request_number }}</td>
                   <td class="text-capitalize">{{ j.service_type }}</td>
-                  <td class="fw-bold text-success">₹{{ j.final_amount }}</td>
+                  <td class="fw-bold text-success">₹{{ j.provider_payout }}</td>
                 </tr>
               {% endfor %}
             </tbody>

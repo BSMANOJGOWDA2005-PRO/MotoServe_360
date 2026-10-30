@@ -40,9 +40,17 @@ def dashboard():
     total_requests = ServiceRequest.query.count()
     total_orders = Order.query.count()
 
-    # Financial Stats
-    service_payments = db.session.query(db.func.sum(Payment.amount)).filter_by(status='completed').scalar() or 0.0
-    total_revenue = round(service_payments, 2)
+    # Financial Stats: Only platform fee goes to admin revenue; fuel charges and delivery fees go to service providers.
+    settings = get_system_settings()
+    default_plat_fee = settings.get('platform_fee', 9.00)
+
+    paid_service_reqs = ServiceRequest.query.filter_by(payment_status='paid').all()
+    service_platform_revenue = sum(
+        req.platform_fee if req.platform_fee is not None else default_plat_fee
+        for req in paid_service_reqs
+    )
+    order_revenue = db.session.query(db.func.sum(Order.total_amount)).filter_by(payment_status='paid').scalar() or 0.0
+    total_revenue = round(service_platform_revenue + order_revenue, 2)
 
     recent_requests = ServiceRequest.query.order_by(ServiceRequest.created_at.desc()).limit(5).all()
     recent_providers = ProviderProfile.query.filter_by(status='pending').limit(5).all()
@@ -77,12 +85,28 @@ def analytics_data():
         label = target_month.strftime('%b %Y')
         months_labels.append(label)
         
-        # Calculate revenue for month
-        rev = db.session.query(db.func.sum(Payment.amount)).filter(
-            Payment.status == 'completed',
-            db.extract('month', Payment.created_at) == target_month.month,
-            db.extract('year', Payment.created_at) == target_month.year
-        ).scalar() or 1500.0 * (i + 1) # Fallback demo trend curve if brand new
+        # Calculate revenue for month: platform fee for service requests + store orders
+        settings = get_system_settings()
+        default_plat_fee = settings.get('platform_fee', 9.00)
+
+        month_reqs = ServiceRequest.query.filter(
+            ServiceRequest.payment_status == 'paid',
+            db.extract('month', ServiceRequest.created_at) == target_month.month,
+            db.extract('year', ServiceRequest.created_at) == target_month.year
+        ).all()
+        month_service_rev = sum(
+            req.platform_fee if req.platform_fee is not None else default_plat_fee
+            for req in month_reqs
+        )
+        month_order_rev = db.session.query(db.func.sum(Order.total_amount)).filter(
+            Order.payment_status == 'paid',
+            db.extract('month', Order.created_at) == target_month.month,
+            db.extract('year', Order.created_at) == target_month.year
+        ).scalar() or 0.0
+
+        rev = month_service_rev + month_order_rev
+        if rev == 0.0:
+            rev = default_plat_fee * (i + 1)
         revenue_series.append(round(rev, 2))
 
     return jsonify({
@@ -390,15 +414,22 @@ def delete_product(product_id):
 @login_required
 @admin_required
 def reports():
-    total_service_rev = db.session.query(db.func.sum(ServiceRequest.final_amount)).filter_by(payment_status='paid').scalar() or 0.0
-    total_order_rev = db.session.query(db.func.sum(Order.total_amount)).filter_by(payment_status='paid').scalar() or 0.0
+    settings = get_system_settings()
+    default_plat_fee = settings.get('platform_fee', 9.00)
+
+    paid_service_reqs = ServiceRequest.query.filter_by(payment_status='paid').all()
+    total_service_rev = round(sum(
+        req.platform_fee if req.platform_fee is not None else default_plat_fee
+        for req in paid_service_reqs
+    ), 2)
+    total_order_rev = round(db.session.query(db.func.sum(Order.total_amount)).filter_by(payment_status='paid').scalar() or 0.0, 2)
     logs = AdminLog.query.order_by(AdminLog.timestamp.desc()).limit(20).all()
 
     return render_template(
         'admin/reports.html',
         total_service_rev=total_service_rev,
         total_order_rev=total_order_rev,
-        grand_total=total_service_rev + total_order_rev,
+        grand_total=round(total_service_rev + total_order_rev, 2),
         logs=logs
     )
 

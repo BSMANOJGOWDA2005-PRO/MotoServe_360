@@ -225,7 +225,8 @@ def request_fuel():
             service_notes=service_notes,
             is_emergency=is_emergency,
             estimated_fee=total_estimated,
-            final_amount=total_estimated
+            final_amount=total_estimated,
+            platform_fee=platform_fee
         )
         db.session.add(service_req)
         db.session.flush()
@@ -380,7 +381,8 @@ def request_repair():
             service_notes=service_notes,
             is_emergency=is_emergency,
             estimated_fee=round(get_system_settings().get('mechanic_inspection_fee', 250.00) + get_system_settings().get('platform_fee', 9.00), 2),
-            final_amount=round(get_system_settings().get('mechanic_inspection_fee', 250.00) + get_system_settings().get('platform_fee', 9.00), 2)
+            final_amount=round(get_system_settings().get('mechanic_inspection_fee', 250.00) + get_system_settings().get('platform_fee', 9.00), 2),
+            platform_fee=get_system_settings().get('platform_fee', 9.00)
         )
         db.session.add(service_req)
         db.session.flush()
@@ -549,7 +551,8 @@ def request_tow():
             distance_km=prov_dist_km,
             service_notes=service_notes,
             estimated_fee=total_fee,
-            final_amount=total_fee
+            final_amount=total_fee,
+            platform_fee=platform_fee
         )
         db.session.add(service_req)
         db.session.flush()
@@ -878,7 +881,7 @@ def process_service_payment(request_id):
     db.session.commit()
 
     if req.provider_profile:
-        create_notification(req.provider_profile.user_id, "Payment Received", f"Payment of ₹{req.final_amount} received for request #{req.request_number}.")
+        create_notification(req.provider_profile.user_id, "Payment Received", f"Payment received for request #{req.request_number}. Your provider payout of ₹{req.provider_payout} has been credited.")
 
     flash('Payment completed successfully!', 'success')
     return redirect(url_for('customer.tracking', request_id=req.id))

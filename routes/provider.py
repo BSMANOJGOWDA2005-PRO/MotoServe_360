@@ -45,9 +45,9 @@ def dashboard():
 
     completed_jobs_count = ServiceRequest.query.filter_by(provider_id=profile.id, status='completed').count()
     
-    # Calculate Total Earnings
+    # Calculate Total Earnings (Fuel charges + delivery fees; excluding platform fee)
     completed_requests = ServiceRequest.query.filter_by(provider_id=profile.id, status='completed').all()
-    total_earnings = sum(req.final_amount for req in completed_requests)
+    total_earnings = round(sum(req.provider_payout for req in completed_requests), 2)
 
     return render_template(
         'provider/dashboard.html',
@@ -163,9 +163,9 @@ def earnings():
     today = datetime.utcnow().date()
     start_of_month = today.replace(day=1)
 
-    daily_earnings = sum(job.final_amount for job in completed_jobs if job.updated_at.date() == today)
-    monthly_earnings = sum(job.final_amount for job in completed_jobs if job.updated_at.date() >= start_of_month)
-    total_earnings = sum(job.final_amount for job in completed_jobs)
+    daily_earnings = round(sum(job.provider_payout for job in completed_jobs if job.updated_at.date() == today), 2)
+    monthly_earnings = round(sum(job.provider_payout for job in completed_jobs if job.updated_at.date() >= start_of_month), 2)
+    total_earnings = round(sum(job.provider_payout for job in completed_jobs), 2)
 
     reviews = Review.query.filter_by(provider_id=profile.id).order_by(Review.created_at.desc()).all()
 
