@@ -1,15 +1,13 @@
-from app import app
 from extensions import db
 from models import (
     User, ProviderProfile, Vehicle, ServiceRequest, FuelDetails, RepairDetails, TowDetails,
     Product, CartItem, Order, OrderItem, Payment, Notification, ChatMessage, Review, AdminLog
 )
 
-def seed_database():
-    print("[+] Initializing database and seeding data...")
-    with app.app_context():
-        db.drop_all()
-        db.create_all()
+def populate_seed_data():
+    """Populates the database with initial demo accounts, products, and records."""
+    if User.query.first() is not None and Product.query.first() is not None:
+        return
 
         # 1. CREATE ADMIN USER
         admin = User(
@@ -347,6 +345,14 @@ def seed_database():
 
         db.session.commit()
         print("[SUCCESS] Database successfully seeded with demo accounts, vehicles, providers, products, and active requests!")
+
+def seed_database():
+    print("[+] Initializing database and seeding data...")
+    from app import app
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
+        populate_seed_data()
 
 if __name__ == '__main__':
     seed_database()

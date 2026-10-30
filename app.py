@@ -17,10 +17,24 @@ def create_app(config_class=Config):
     session_ext.init_app(app)
     mail.init_app(app)
 
-    # Safe Schema Verification & Non-destructive Migration
-    from migrate_db import migrate_database
+    # Database Initialization, Safe Schema Verification & Non-destructive Migration
     with app.app_context():
+        import models  # Ensure all SQLAlchemy models are registered
+        db.create_all()
+
+        from migrate_db import migrate_database
         migrate_database()
+
+        # Auto-seed database if fresh deployment (no users/products)
+        try:
+            from models import Product, User
+            if User.query.first() is None or Product.query.first() is None:
+                print("[*] Fresh database detected. Seeding initial demo data...")
+                from seed import populate_seed_data
+                populate_seed_data()
+        except Exception as e:
+            print(f"[!] Auto-seeding check: {e}")
+            db.session.rollback()
 
     # Register Blueprints
     from routes import main_bp, auth_bp, customer_bp, provider_bp, admin_bp, api_bp
@@ -73,7 +87,4 @@ def create_app(config_class=Config):
 app = create_app()
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     app.run(debug=True, port=5000)
-    

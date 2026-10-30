@@ -3,15 +3,31 @@ import os
 
 def migrate_database(db_path=None):
     if not db_path:
+        try:
+            from flask import current_app
+            if current_app and current_app.config.get('SQLALCHEMY_DATABASE_URI'):
+                uri = current_app.config['SQLALCHEMY_DATABASE_URI']
+                if uri.startswith('sqlite:///'):
+                    db_path = uri.replace('sqlite:///', '')
+        except Exception:
+            pass
+
+    if not db_path:
         base_dir = os.path.dirname(os.path.abspath(__file__))
         db_path = os.path.join(base_dir, 'instance', 'database.db')
 
+    # If using non-sqlite db or file doesn't exist yet
     if not os.path.exists(db_path):
-        print(f"[*] Database file does not exist at {db_path}. It will be initialized on app start.")
+        print(f"[*] Database file does not exist at {db_path}. Skipping sqlite manual migrations.")
         return
 
     print(f"[*] Checking database schema at {db_path}...")
-    conn = sqlite3.connect(db_path)
+    try:
+        conn = sqlite3.connect(db_path)
+    except Exception as e:
+        print(f"[*] Could not open sqlite database at {db_path}: {e}")
+        return
+
     cursor = conn.cursor()
 
     try:
